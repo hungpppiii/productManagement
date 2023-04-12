@@ -6,7 +6,7 @@ async function setupConnectDB() {
     try {
         await sequelize.authenticate();
         await sequelize.sync({
-            force: true
+            alter: true
         });
         console.log('Database Connection successfully.');
     } catch (error) {
