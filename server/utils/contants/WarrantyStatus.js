@@ -1,5 +1,5 @@
 module.exports = {
-    WARRANTING: 'warranting',
+    WARRANTING: 'warranty',
     DONE: 'warranty_done',
     DEFECTIVE: 'defective_product',
 }
