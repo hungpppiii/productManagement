@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) =>
         },
         warrantyEndTime: {
             type: DataTypes.DATE,
-            allowNull: false,
             field: 'warranty_end_time',
         },
     }, {
