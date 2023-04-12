@@ -1,12 +1,12 @@
 const app = require('./app');
-const sequelize = require('./config/db')
+const sequelize = require('./config/db');
 const PORT = process.env.PORT || 5000;
 
 async function setupConnectDB() {
     try {
         await sequelize.authenticate();
         await sequelize.sync({
-            force: true
+            alter: true,
         });
         console.log('Database Connection successfully.');
     } catch (error) {
@@ -19,8 +19,8 @@ async function setupConnectDB() {
 async function init() {
     await setupConnectDB();
     app.listen(PORT, () => {
-        console.log(`Server is running at http://localhost:${PORT}`)
-    })
+        console.log(`Server is running at http://localhost:${PORT}`);
+    });
 }
 
 init();
