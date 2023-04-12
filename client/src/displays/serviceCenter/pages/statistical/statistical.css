@@ -1,0 +1,17 @@
+.statistical {
+    display: flex;
+    height: 97%;
+    width: 97%;
+    background: rgba(255, 255, 255, 0.54);
+    border-radius: 2rem;
+    grid-template-columns: 11rem auto 20rem;
+    overflow: hidden;
+}
+
+.wrapper {
+    flex: 6;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}

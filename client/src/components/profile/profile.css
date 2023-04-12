@@ -1,0 +1,85 @@
+
+.top {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+img {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    border: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.model, .overlay {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute ;
+    backface-visibility: hidden;
+    z-index: 1;
+}
+
+.model {
+    animation: fadeIn linear 0.3s;
+}
+
+.overlay {
+    background: rgba(49,49,49,0.8);
+}
+.content {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    margin-top: 40px;
+    transform: translate(-50%, -50%);
+    line-height: 1.4;
+    background: #f1f1f1;
+    padding: 14px 28px;
+    border-radius: 10px;
+    max-width: 600px;
+    min-width: 300px;
+    z-index: 2;
+}
+
+
+
+
+
+.avatarWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.avatar2 {
+    height: 70px;
+    width: 70px;
+}
+
+.avatar {
+    height: 60px;
+    width: 60px;
+    margin-top: 10px;
+}
+
+h3 {
+    padding-top: 10px;
+    /* font-size: 15px; */
+}

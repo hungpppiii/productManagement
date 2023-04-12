@@ -1,0 +1,63 @@
+
+
+.accounts {
+    display: flex;
+    height: 97%;
+    width: 97%;
+    background: rgba(255, 255, 255, 0.54);
+    border-radius: 2rem;
+    grid-template-columns: 11rem auto 20rem;
+    overflow: hidden;
+}
+
+.mainAccount {
+    display: flex;
+    flex-direction: column;
+}
+
+.navAccount {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+ .createAccount {
+    float: right;
+    height: 45px;
+    width: 100px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 0.5px solid lightgray;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.54);
+    font-weight: 600;
+    color: #888;
+    line-height: 20px;
+}
+
+.createAccount:hover {
+    background: lightgray;
+}
+
+input.submitAccount {
+    float: right !important;
+    width: 70px;
+    padding-left: 5px;
+    margin-right: 30px !important;
+    margin-top: 40px !important;
+    border-radius: 10px !important;
+    height: 30px !important;
+    background: rbg(190, 190, 190);
+}
+
+.row {
+    display: flex;
+    flex-direction: column;
+}
+
+small {
+    display: block;
+    color: red;
+    /* width: 50% !important; */
+    /* max-width: 50% !important; */
+}

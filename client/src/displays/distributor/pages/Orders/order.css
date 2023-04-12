@@ -1,0 +1,92 @@
+
+
+.order {
+    display: flex;
+    height: 97%;
+    width: 97%;
+    background: rgba(255, 255, 255, 0.54);
+    border-radius: 2rem;
+    grid-template-columns: 11rem auto 20rem;
+    overflow: hidden;
+}
+
+.wrapper {
+    flex: 6;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.orderWrapper {
+    display: flex;
+    margin-left: 10px;
+    height: 100%;
+}
+
+.listOrder {
+    flex: 2;
+    border-right: 0.5px solid lightgray;
+}
+
+.listOrder  > h4 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mainOrder {
+    flex: 1;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.orderDetail {
+    width: 100%;
+    height: 80%;
+    /* background: lightgray; */
+    background: #ffdefd !important;
+    margin-right: 10px;
+}
+
+.oderContent {
+    display: flex;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    align-items: center;
+    justify-content: center;
+}
+.rowOrder {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 90%;
+    height: 25px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+    border-bottom: 0.5px solid lightgray;
+    line-height: 40px;
+}
+
+.firstRow {
+    margin-top: 45px;
+}
+
+
+.createOrder {
+    margin-top: 20px;
+    margin-left: 0;
+    height: 40px;
+    /* cursor: pointer; */
+}
+
+@media screen and (max-width: 940px) {
+    .mainOrder {
+        display: none;
+    }
+}
