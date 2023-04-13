@@ -51,11 +51,10 @@ Store.belongsToMany(Factory, {
     through: 'store_factory',
 });
 
-Factory.belongsTo(Account),
-    {
-        foreignKey: 'account_id',
-        allowNull: false,
-    };
+Factory.belongsTo(Account, {
+    foreignKey: 'account_id',
+    allowNull: false,
+});
 
 // Guarantee association
 Guarantee.belongsToMany(Store, {
@@ -66,11 +65,10 @@ Store.belongsToMany(Guarantee, {
     through: 'store_guarantee',
 });
 
-Guarantee.belongsTo(Account),
-    {
-        foreignKey: 'account_id',
-        allowNull: false,
-    };
+Guarantee.belongsTo(Account, {
+    foreignKey: 'account_id',
+    allowNull: false,
+});
 
 // Order association
 Customer.hasMany(Order, {
@@ -125,11 +123,10 @@ Product.belongsTo(Factory, {
 });
 
 // Store association
-Store.belongsTo(Account),
-    {
-        foreignKey: 'account_id',
-        allowNull: false,
-    };
+Store.belongsTo(Account, {
+    foreignKey: 'account_id',
+    allowNull: false,
+});
 
 //  Warranty Information association
 Product.hasMany(WarrantyInformation, {
