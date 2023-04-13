@@ -9,11 +9,12 @@ module.exports = (sequelize, DataTypes) =>
                 allowNull: false,
                 field: 'guarantee_id',
             },
-            // accountId: {
-            //     type: DataTypes.INTEGER,
-            //     allowNull: false,
-            //     field: 'account_id',
-            // },
+            accountId: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                unique: true,
+                field: 'account_id',
+            },
             name: {
                 type: DataTypes.STRING,
                 allowNull: false,
