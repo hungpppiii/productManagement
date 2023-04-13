@@ -1,23 +1,27 @@
 module.exports = (sequelize, DataTypes) =>
-    sequelize.define('Customer', {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true,
-            allowNull: false,
-            field: 'customer_id',
+    sequelize.define(
+        'Customer',
+        {
+            id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true,
+                allowNull: false,
+                field: 'customer_id',
+            },
+            customerName: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                field: 'customer_name',
+            },
+            address: {
+                type: DataTypes.STRING,
+            },
+            phone: {
+                type: DataTypes.STRING,
+            },
         },
-        customerName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            field: 'customer_name'
+        {
+            tableName: 'customer',
         },
-        address: {
-            type: DataTypes.STRING,
-        },
-        phone: {
-            type: DataTypes.STRING,
-        },
-    }, {
-        tableName: 'customer',
-    });
+    );
