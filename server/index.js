@@ -5,9 +5,7 @@ const PORT = process.env.PORT || 5000;
 async function setupConnectDB() {
     try {
         await sequelize.authenticate();
-        await sequelize.sync({
-            alter: true,
-        });
+        await sequelize.sync();
         console.log('Database Connection successfully.');
     } catch (error) {
         console.log('Connection failure!');

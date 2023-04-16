@@ -3,4 +3,4 @@ module.exports = {
     FACTORY: 'factory',
     STORE: 'store',
     GUARANTEE: 'guarantee',
-}
+};

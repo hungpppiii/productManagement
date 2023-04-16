@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const route = require('./routes');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -14,6 +15,9 @@ app.use(cors());
 
 // dev logging
 app.use(morgan('combined'));
+
+// parse cookie
+app.use(cookieParser());
 
 // parse application/x-www-form-urlencoded
 app.use(

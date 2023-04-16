@@ -1,5 +1,11 @@
-const factoryController = require('./factoryController');
+const authController = require('./authController');
+const accountController = require('./accountController');
+const productController = require('./productController');
+const productLineController = require('./productLineController');
 
 module.exports = {
-    factoryController,
+    authController,
+    accountController,
+    productController,
+    productLineController,
 };
