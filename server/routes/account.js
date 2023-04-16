@@ -3,9 +3,14 @@ const { accountController } = require('../controllers');
 const { verifyAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.route('/').get(verifyAdmin, accountController.getAccountList);
-router.route('/factory').get(verifyAdmin, accountController.getFactoryList);
-router.route('/store').get(verifyAdmin, accountController.getStoreList);
-router.route('/guarantee').get(verifyAdmin, accountController.getGuaranteeList);
+router
+    .route('/getAllAccount')
+    .get(verifyAdmin, accountController.getAllAccount);
+router
+    .route('/:accountID')
+    .get(verifyAdmin, accountController.findOne)
+    .put(verifyAdmin, accountController.editAccount)
+    .delete(verifyAdmin, accountController.deleteAccount);
+router.route('/addAccount').post(verifyAdmin, accountController.addAccount);
 
 module.exports = router;
