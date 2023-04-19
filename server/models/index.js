@@ -113,7 +113,7 @@ ProductLine.hasMany(Product, {
 });
 
 Product.belongsTo(ProductLine, {
-    foreignKey: 'factory_id',
+    foreignKey: 'product_line_id',
     allowNull: false,
 });
 

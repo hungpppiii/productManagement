@@ -5,9 +5,9 @@ const getAllProductLine = async (req, res, next) => {
     try {
         const productLines = await ProductLine.findAll();
         res.json(productLines);
-    } catch (err) {
+    } catch (error) {
         return res.status(409).send({
-            error: err,
+            error,
         });
     }
 };
@@ -73,13 +73,12 @@ const editProductLine = async (req, res, next) => {
         }
     } catch (error) {
         return res.status(409).send({
-            error: error,
+            error,
         });
     }
 };
 
 const deleteProductLine = async (req, res, next) => {
-    // ch check xoa cac bang khac
     try {
         const deleteProductLine = await ProductLine.destroy({
             where: {
@@ -96,14 +95,9 @@ const deleteProductLine = async (req, res, next) => {
                 message: 'Delete productLine fail',
             });
         }
-        // BankingModel.destroy({
-        //   where: {
-        //     credit_card_number: req.body.old_credit_card,
-        //   },
-        // });
     } catch (error) {
         return res.status(409).send({
-            error: error,
+            error,
         });
     }
 };
