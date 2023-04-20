@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) =>
                 allowNull: false,
                 field: 'customer_id',
             },
-            customerName: {
+            name: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 field: 'customer_name',

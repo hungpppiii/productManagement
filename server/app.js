@@ -11,7 +11,22 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 // enables CORS
-app.use(cors());
+app.use(
+    cors({
+        origin: true,
+        credentials: true,
+    }),
+);
+
+// app.use(function (req, res, next) {
+//     res.header('Content-Type', 'application/json;charset=UTF-8')
+//     res.header('Access-Control-Allow-Credentials', true)
+//     res.header(
+//         'Access-Control-Allow-Headers',
+//         'Origin, X-Requested-With, Content-Type, Accept'
+//     )
+//     next()
+// })
 
 // dev logging
 app.use(morgan('combined'));

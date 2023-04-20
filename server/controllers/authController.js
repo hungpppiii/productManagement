@@ -8,7 +8,9 @@ const login = async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(500).send('Missing account or password');
+        return res.status(500).send({
+            message: 'Missing account or password',
+        });
     }
 
     const account = await Account.findOne({
@@ -19,7 +21,9 @@ const login = async (req, res) => {
     });
 
     if (!account) {
-        return res.status(500).send('Account does not exist');
+        return res.status(500).json({
+            error: 'Account does not exist',
+        });
     }
 
     const token = jwt.sign(

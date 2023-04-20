@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) =>
                 type: DataTypes.DATE,
                 allowNull: false,
                 defaultValue: DataTypes.NOW,
-                field: 'distribution_date',
+                field: 'order_date',
             },
         },
         {

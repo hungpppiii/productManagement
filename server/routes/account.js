@@ -6,11 +6,13 @@ const router = express.Router();
 router
     .route('/getAllAccount')
     .get(verifyAdmin, accountController.getAllAccount);
+
 router
     .route('/:accountID')
     .get(verifyAdmin, accountController.findOne)
     .put(verifyAdmin, accountController.editAccount)
     .delete(verifyAdmin, accountController.deleteAccount);
+
 router.route('/addAccount').post(verifyAdmin, accountController.addAccount);
 
 module.exports = router;

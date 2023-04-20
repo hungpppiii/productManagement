@@ -1,4 +1,3 @@
-const { response } = require('express');
 const { Account, Factory, Store, Guarantee } = require('../models');
 const accountRule = require('../utils/constants/AccountRule');
 const jwt = require('jsonwebtoken');
@@ -16,7 +15,9 @@ const verifyAccount = async (req, res, next) => {
     }
 
     if (!token) {
-        return res.status(401).send('Not authorize to access this route');
+        return res.status(401).json({
+            error: 'Not authorize to access this route',
+        });
     }
 
     try {
@@ -25,7 +26,9 @@ const verifyAccount = async (req, res, next) => {
         const account = await Account.findByPk(accountId);
 
         if (!account) {
-            return res.status(401).send('Not authorize to access this route 1');
+            return res.status(401).json({
+                error: 'Not authorize to access this route',
+            });
         }
 
         req.accountId = account.id;
@@ -33,33 +36,33 @@ const verifyAccount = async (req, res, next) => {
 
         next();
     } catch (error) {
-        return res.status(401).send('Not authorize to access this route');
+        return res.status(401).json({
+            error: 'Not authorize to access this route',
+        });
     }
 };
 
-const verifyAdmin = async (req, res, next, value) => {
+const verifyAdmin = async (req, res, next) => {
     try {
         if (req.accountRole !== accountRule.ADMIN) {
-            return res
-                .status(403)
-                .send(
-                    `User role ${res.locals.accountRole} is not authorized to access this routes`,
-                );
+            return res.status(403).json({
+                error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
+            });
         }
         next();
     } catch (error) {
-        res.status(400).send('error user authentication');
+        res.status(400).json({
+            error: 'error user authentication',
+        });
     }
 };
 
 const verifyFactory = async (req, res, next) => {
     try {
         if (req.accountRole !== accountRule.FACTORY) {
-            return res
-                .status(403)
-                .send(
-                    `User role ${res.locals.accountRole} is not authorized to access this routes`,
-                );
+            return res.status(403).json({
+                error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
+            });
         }
 
         const factory = await Factory.findOne({
@@ -69,24 +72,25 @@ const verifyFactory = async (req, res, next) => {
         });
 
         if (!factory) {
-            return res.status(400).send('error user authentication');
+            throw new Error();
         }
-        req.factoryId = factory.id;
+
+        res.locals.factory = factory;
 
         next();
     } catch (error) {
-        res.status(400).send('error user authentication');
+        res.status(400).json({
+            error: 'error user authentication',
+        });
     }
 };
 
 const verifyStore = async (req, res, next) => {
     try {
         if (req.accountRole !== accountRule.STORE) {
-            return res
-                .status(403)
-                .send(
-                    `User role ${res.locals.accountRole} is not authorized to access this routes`,
-                );
+            return res.status(403).json({
+                error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
+            });
         }
 
         const store = await Store.findOne({
@@ -96,25 +100,25 @@ const verifyStore = async (req, res, next) => {
         });
 
         if (!store) {
-            return res.status(400).send('error user authentication');
+            throw new Error();
         }
 
-        req.storeId = store.id;
+        res.locals.store = store;
 
         next();
     } catch (error) {
-        res.status(400).send('error user authentication');
+        res.status(400).json({
+            error: 'error user authentication',
+        });
     }
 };
 
 const verifyGuarantee = async (req, res, next) => {
     try {
         if (req.accountRole !== accountRule.GUARANTEE) {
-            return res
-                .status(403)
-                .send(
-                    `User role ${res.locals.accountRole} is not authorized to access this routes`,
-                );
+            return res.status(403).json({
+                error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
+            });
         }
 
         const guarantee = await Guarantee.findOne({
@@ -124,13 +128,16 @@ const verifyGuarantee = async (req, res, next) => {
         });
 
         if (!guarantee) {
-            return res.status(400).send('error user authentication');
+            throw new Error();
         }
-        req.guaranteeId = guarantee.id;
+
+        res.locals.guarantee = guarantee;
 
         next();
     } catch (error) {
-        res.status(400).send('error user authentication');
+        res.status(400).json({
+            error: 'error user authentication',
+        });
     }
 };
 

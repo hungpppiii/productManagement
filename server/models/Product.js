@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) =>
             },
             productLineId: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
+                // allowNull: false,
                 field: 'product_line_id',
             },
             productionDate: {

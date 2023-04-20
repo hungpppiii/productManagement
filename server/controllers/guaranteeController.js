@@ -1,7 +1,7 @@
 const { Guarantee, WarrantyInformation } = require('../models');
 const sequelize = require('../config/db');
 
-const getInfoGuarantee = async (req, res, next) => {
+const getInfoGuarantee = async (req, res) => {
     try {
         const guarantee = await Guarantee.findOne({
             where: {
@@ -10,11 +10,13 @@ const getInfoGuarantee = async (req, res, next) => {
         });
         res.json(guarantee);
     } catch (err) {
-        return res.status(409).send({ error: err });
+        return res.status(409).send({
+            error: err,
+        });
     }
 };
 
-const editInfoGuarantee = async (req, res, next) => {
+const editInfoGuarantee = async (req, res) => {
     try {
         const update = await Guarantee.update(
             {
@@ -22,7 +24,11 @@ const editInfoGuarantee = async (req, res, next) => {
                 address: req.body.address,
                 phone: req.body.phone,
             },
-            { where: { account_id: req.params.accountID } },
+            {
+                where: {
+                    account_id: req.params.accountID,
+                },
+            },
         );
         if (update[0] === 1) {
             return res.status(201).send({
@@ -33,17 +39,14 @@ const editInfoGuarantee = async (req, res, next) => {
                 message: 'Update fail',
             });
         }
-        // BankingModel.destroy({
-        //   where: {
-        //     credit_card_number: req.body.old_credit_card,
-        //   },
-        // });
     } catch (error) {
-        return res.status(409).send({ error: error });
+        return res.status(409).send({
+            error: error,
+        });
     }
 };
 
-const getAllProductWaranty = async (req, res, next) => {
+const getAllProductWarranty = async (req, res, next) => {
     try {
         const products = await sequelize.query(
             'SELECT w.*, pl.name, c.customer_name\
@@ -61,7 +64,9 @@ const getAllProductWaranty = async (req, res, next) => {
         const s = products[0];
         res.status(200).send(s);
     } catch (err) {
-        return res.status(409).send({ error: err });
+        return res.status(409).send({
+            error: err,
+        });
     }
 };
 
@@ -71,7 +76,11 @@ const editProduct = async (req, res, next) => {
             {
                 status: req.body.status,
             },
-            { where: { product_id: req.params.productID } },
+            {
+                where: {
+                    product_id: req.params.productID,
+                },
+            },
         );
         if (update[0] === 1) {
             return res.status(201).send({
@@ -88,13 +97,15 @@ const editProduct = async (req, res, next) => {
         //   },
         // });
     } catch (error) {
-        return res.status(409).send({ error: error });
+        return res.status(409).send({
+            error: error,
+        });
     }
 };
 
 module.exports = {
     getInfoGuarantee,
     editInfoGuarantee,
-    getAllProductWaranty,
+    getAllProductWarranty,
     editProduct,
 };

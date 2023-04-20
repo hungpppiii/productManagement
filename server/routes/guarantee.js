@@ -12,7 +12,7 @@ router
 
 router
     .route('/getAllProduct/:guaranteeID')
-    .get(guaranteeController.getAllProductWaranty);
+    .get(guaranteeController.getAllProductWarranty);
 router.route('/editProduct/:productID').put(guaranteeController.editProduct);
 
 module.exports = router;

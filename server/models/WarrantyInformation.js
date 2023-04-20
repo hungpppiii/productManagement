@@ -2,13 +2,10 @@ module.exports = (sequelize, DataTypes) =>
     sequelize.define(
         'WarrantyInformation',
         {
-            status: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
             warrantyStartTime: {
                 type: DataTypes.DATE,
                 allowNull: false,
+                defaultValue: DataTypes.NOW,
                 field: 'warranty_start_time',
             },
             warrantyEndTime: {
