@@ -1,10 +1,21 @@
-const { Account } = require('../models');
+const { response } = require('express');
+const { Account, Factory, Store, Guarantee } = require('../models');
+const AccountRule = require('../utils/constants/AccountRule');
+const { Op } = require('sequelize');
 
 const getAllAccount = async (req, res, next) => {
     try {
-        const accounts = await Account.findAll();
+        console.log('get all');
+        const accounts = await Account.findAll({
+            where: {
+                role: {
+                    [Op.not]: AccountRule.ADMIN,
+                },
+            },
+        });
         res.json(accounts);
     } catch (err) {
+        console.log(err);
         return res.status(409).send({
             error: err,
         });
@@ -24,7 +35,7 @@ const findOne = async (req, res, next) => {
 
 const addAccount = async (req, res, next) => {
     try {
-        const { username, password, role } = req.body;
+        const { username, password, role, ...facilityConfig } = req.body;
         const data = {
             username,
             //   password: await bcrypt.hash(password, 10),
@@ -47,9 +58,43 @@ const addAccount = async (req, res, next) => {
             // saving the user
             const user = await Account.create(data);
             if (user) {
-                return res.status(201).send({
-                    user: user,
-                    message: 'User registered successfully.',
+                // return res.status(201).send({
+                //   user: user,
+                //   message: "User registered successfully.",
+                // });
+                let facility;
+                switch (role) {
+                    case AccountRule.FACTORY:
+                        facility = await Factory.create({
+                            ...facilityConfig,
+                            accountId: user.id,
+                        });
+                        break;
+                    case AccountRule.STORE:
+                        facility = await Store.create({
+                            ...facilityConfig,
+                            accountId: user.id,
+                        });
+
+                        break;
+                    case AccountRule.GUARANTEE:
+                        facility = await Guarantee.create({
+                            ...facilityConfig,
+                            accountId: user.id,
+                        });
+                        break;
+
+                    default:
+                        facility = { bug: 'bug' };
+                        break;
+                }
+                console.log(facility);
+                return res.json({
+                    message: 'success',
+                    data: {
+                        ...user.toJSON(),
+                        facility,
+                    },
                 });
             } else {
                 return res.status(409).send({

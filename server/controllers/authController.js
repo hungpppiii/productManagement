@@ -29,6 +29,8 @@ const login = async (req, res) => {
         process.env.SECRET_KEY,
     );
 
+    res.cookie('token', token);
+
     res.status(200).json({
         token,
         accountRole: account.role,
