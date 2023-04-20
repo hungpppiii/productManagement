@@ -5,37 +5,39 @@ const {
     Customer,
     Order,
     WarrantyInformation,
-    Factory,
-    Store,
     Guarantee,
 } = require('../models');
 const sequelize = require('../config/db');
 const ProductStatus = require('../utils/constants/ProductStatus');
 const AccountRule = require('../utils/constants/AccountRule');
 
-// @desc      get product list
-// @route     [GET] /api/product/getAllProducts
+// @desc      get product list inventory
+// @route     [GET] /api/product/getAllProducts/inventory
 // @access    Private/Factory
-const getAllProduct = async (req, res) => {
+const getAllProductInventory = async (req, res) => {
     try {
-        let data;
-        switch (req.accountRole) {
-            case AccountRule.FACTORY:
-                data = await getAllProductOfFactory(req, res);
-                break;
-            case AccountRule.STORE:
-                data = await getAllProductOfStore(req, res);
-                break;
-            case AccountRule.GUARANTEE:
-                data = await getAllProductOfGuaranty(req, res);
-                break;
-            default:
-                throw new Error();
+        const factory = res.locals.factory;
+
+        const products = await factory.getProducts({
+            where: {
+                status: ProductStatus.INVENTORY,
+            },
+            attributes: ['id', 'productionDate', 'status'],
+            include: {
+                model: ProductLine,
+                required: true,
+                attributes: ['name', 'warrantyPeriod', 'description'],
+            },
+            required: true,
+        });
+
+        if (!products) {
+            throw new Error();
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: 'get products successfully',
-            data,
+            data: products,
         });
     } catch (error) {
         console.log(error);
@@ -45,107 +47,188 @@ const getAllProduct = async (req, res) => {
     }
 };
 
-const getAllProductOfFactory = async (req, res) => {
+// @desc      get product list error
+// @route     [GET] /api/product/getAllProducts/error
+// @access    Private/Factory
+const getAllProductError = async (req, res) => {
     try {
-        const factory = await Factory.findOne({
+        const factory = res.locals.factory;
+
+        const products = await factory.getProducts({
             where: {
-                accountId: req.accountId,
+                status: ProductStatus.ERROR,
             },
+            attributes: ['id', 'productionDate', 'status'],
+            include: {
+                model: ProductLine,
+                required: true,
+                attributes: ['name', 'warrantyPeriod', 'description'],
+            },
+            required: true,
+        });
+
+        if (!products) {
+            throw new Error();
+        }
+
+        return res.status(200).json({
+            message: 'get products successfully',
+            data: products,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: `get product failed: ${error}`,
+        });
+    }
+};
+
+// @desc      get product list distributed
+// @route     [GET] /api/product/getAllProducts/distributed
+// @access    Private/Store
+const getAllProductDistributed = async (req, res) => {
+    try {
+        const store = res.locals.store;
+
+        const distributeInformations = await store.getDistributeInformations({
+            attributes: ['distributionDate'],
             include: {
                 model: Product,
+                where: {
+                    status: ProductStatus.DISTRIBUTED,
+                },
                 attributes: ['id', 'productionDate', 'status'],
                 include: {
                     model: ProductLine,
                     required: true,
                     attributes: ['name', 'warrantyPeriod', 'description'],
                 },
+                require: true,
             },
         });
 
-        if (!factory) {
+        if (!distributInformations) {
             throw new Error();
         }
 
-        return factory.Products;
-    } catch (error) {
-        throw new Error('error user authentication');
-    }
-};
+        // const products = distributeInformations.map(
+        //     (distributeInfo) => {
+        //         const product = distributeInfo.toJSON().Product;
+        //         product.distributionDate = distributeInfo.distributionDate;
+        //         return product
+        //     }
+        // );
 
-const getAllProductOfStore = async (req, res) => {
-    try {
-        const store = await Store.findOne({
-            where: {
-                accountId: req.accountId,
-            },
-            include: {
-                model: DistributeInformation,
-                include: {
-                    model: Product,
-                    attributes: ['id', 'productionDate', 'status'],
-                    include: {
-                        model: ProductLine,
-                        required: true,
-                        attributes: ['name', 'warrantyPeriod', 'description'],
-                    },
-                },
-            },
+        return res.status(200).json({
+            message: 'get products successfully',
+            data: distributeInformations,
         });
-
-        if (!store) {
-            throw new Error();
-        }
-
-        const products = store
-            .toJSON()
-            .DistributeInformations.map(
-                (distributeInfo) => distributeInfo.Product,
-            );
-
-        return products;
     } catch (error) {
         console.log(error);
-        throw new Error('error user authentication');
+        return res.status(500).json({
+            error: `get product failed: ${error}`,
+        });
     }
 };
 
-const getAllProductOfGuaranty = async (req, res) => {
+// @desc      get product list sold
+// @route     [GET] /api/product/getAllProducts/sold
+// @access    Private/Store
+const getAllProductSold = async (req, res) => {
     try {
-        const guarantee = await Guarantee.findOne({
-            where: {
-                accountId: req.accountId,
-            },
-            include: {
-                model: WarrantyInformation,
-                include: {
+        const store = res.locals.store;
+
+        const orders = await store.getOrders({
+            attributes: ['orderDate'],
+            include: [
+                {
                     model: Product,
+                    where: {
+                        status: ProductStatus.SOLD,
+                    },
                     attributes: ['id', 'productionDate', 'status'],
+                    require: true,
                     include: {
                         model: ProductLine,
                         required: true,
                         attributes: ['name', 'warrantyPeriod', 'description'],
                     },
                 },
-            },
+                {
+                    model: Customer,
+                    attributes: ['name', 'address', 'phone'],
+                    require: true,
+                },
+            ],
         });
 
-        console.log(guarantee.toJSON());
-
-        if (!guarantee) {
+        if (!orders) {
             throw new Error();
         }
 
-        const products = guarantee
-            .toJSON()
-            .WarrantyInformations.map((warrantyInfo) => warrantyInfo.Product);
-
-        return products;
+        return res.status(200).json({
+            message: 'get products successfully',
+            data: orders,
+        });
     } catch (error) {
-        throw new Error('error user authentication');
+        console.log(error);
+        return res.status(500).json({
+            error: `get product failed: ${error}`,
+        });
     }
 };
 
-// @desc      get product
+// @desc      get product list warranty
+// @route     [GET] /api/product/getAllProducts/warranty
+// @access    Private/Guarantee
+const getAllProductWarranty = async (req, res) => {
+    try {
+        const guarantee = res.locals.guarantee;
+
+        const warrantyInformations = await guarantee.getWarrantyInformations({
+            where: {
+                warrantyEndTime: null,
+            },
+            attributes: ['warrantyStartTime'],
+            include: [
+                {
+                    model: Product,
+                    where: {
+                        status: ProductStatus.WARRANTY,
+                    },
+                    attributes: ['id', 'productionDate', 'status'],
+                    require: true,
+                    include: {
+                        model: ProductLine,
+                        required: true,
+                        attributes: ['name', 'warrantyPeriod', 'description'],
+                    },
+                },
+                {
+                    model: Customer,
+                    attributes: ['name', 'address', 'phone'],
+                    require: true,
+                },
+            ],
+        });
+
+        if (!warrantyInformations) {
+            throw new Error();
+        }
+
+        return res.status(200).json({
+            message: 'get products successfully',
+            data: warrantyInformations,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: `get product failed: ${error}`,
+        });
+    }
+};
+
+// @desc      get product by id
 // @route     [GET] /api/product/:id
 // @access    Private
 const getProduct = async (req, res) => {
@@ -418,8 +501,61 @@ const productWarranty = async (req, res) => {
         await transaction.commit();
 
         return res.status(200).json({
-            message: 'Product sold successfully',
+            message: `Change the product status to successfully ${ProductStatus.WARRANTY}`,
             data: warrantyInfo,
+        });
+    } catch (error) {
+        await transaction.rollback();
+        console.log(error);
+        return res.status(500).json({
+            error,
+        });
+    }
+};
+
+const returnProductAfterWarranty = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const product_id = req.params.id;
+
+        if (isNaN(parseInt(product_id))) {
+            return res.status(400).json({
+                error: 'The product id is incorrect',
+            });
+        }
+
+        // warrantyStatus = ProductStatus.SOLD || ProductStatus.ERROR
+        const { warrantyStatus } = req.body;
+
+        await updateProductStatus(
+            product_id,
+            ProductStatus.WARRANTY,
+            warrantyStatus,
+            transaction,
+        )();
+
+        const warrantyEndTime = new Date();
+
+        const updated = await WarrantyInformation.update(
+            {
+                warrantyEndTime,
+            },
+            {
+                where: {
+                    product_id,
+                },
+                transaction,
+            },
+        );
+
+        if (!updated[0]) {
+            throw new Error(`Product cannot be ${warrantyStatus}`);
+        }
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            message: `Change the product status to successfully ${warrantyStatus}`,
         });
     } catch (error) {
         await transaction.rollback();
@@ -437,12 +573,13 @@ const updateProductStatus =
                 id,
             },
         });
+
         if (!product) {
             throw new Error('The product does not exist');
         }
 
         if (product.status === newStatus) {
-            throw new Error('The product does not exist in stock');
+            throw new Error(`Product product was ${newStatus}`);
         }
 
         if (product.status !== currentStatus) {
@@ -464,7 +601,11 @@ const updateProductStatus =
     };
 
 module.exports = {
-    getAllProduct,
+    getAllProductInventory,
+    getAllProductError,
+    getAllProductDistributed,
+    getAllProductSold,
+    getAllProductWarranty,
     getProduct,
     createProduct,
     updateProduct,
@@ -472,4 +613,5 @@ module.exports = {
     productDistribution,
     soldProduct,
     productWarranty,
+    returnProductAfterWarranty,
 };

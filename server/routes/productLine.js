@@ -1,22 +1,16 @@
 const express = require('express');
 const { productLineController } = require('../controllers');
-const { verifyAccount, verifyAdmin } = require('../middlewares/authMiddleware');
+const { verifyAdmin } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
-router
-    .route('/getAllProductLine')
-    .get(verifyAccount, productLineController.getAllProductLine);
+router.route('/getAllProductLine').get(productLineController.getAllProductLine);
 router
     .route('/addProductLine')
-    .post(verifyAccount, verifyAdmin, productLineController.addProductLine);
+    .post(verifyAdmin, productLineController.addProductLine);
 router
     .route('/:id')
-    .put(verifyAccount, verifyAdmin, productLineController.editProductLine)
-    .delete(
-        verifyAccount,
-        verifyAdmin,
-        productLineController.deleteProductLine,
-    );
+    .put(verifyAdmin, productLineController.editProductLine)
+    .delete(verifyAdmin, productLineController.deleteProductLine);
 
 module.exports = router;

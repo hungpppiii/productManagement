@@ -1,7 +1,7 @@
 const { ProductLine } = require('../models');
 const sequelize = require('../config/db');
 
-const getAllProductLine = async (req, res, next) => {
+const getAllProductLine = async (req, res) => {
     try {
         const productLines = await ProductLine.findAll();
         res.json(productLines);
@@ -12,7 +12,7 @@ const getAllProductLine = async (req, res, next) => {
     }
 };
 
-const addProductLine = async (req, res, next) => {
+const addProductLine = async (req, res) => {
     const data = {
         name: req.body.name,
         price: req.body.price,

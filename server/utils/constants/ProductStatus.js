@@ -3,5 +3,5 @@ module.exports = {
     DISTRIBUTED: 'distributed',
     SOLD: 'sold',
     WARRANTY: 'warranty',
-    BROKEN: 'broken',
+    ERROR: 'error',
 };
