@@ -7,20 +7,16 @@ router
     .route('/getAllAccount')
     .get(verifyAdmin, accountController.getAllAccount);
 
-router
-    .route('/getAllFactory')
-    .get(verifyAdmin, accountController.getAllFactory);
+router.route('/getAllFactory').get(accountController.getAllFactory);
 
-router.route('/getAllStore').get(verifyAdmin, accountController.getAllStore);
+router.route('/getAllStore').get(accountController.getAllStore);
 
-router
-    .route('/getAllGuarantee')
-    .get(verifyAdmin, accountController.getAllGuarantee);
+router.route('/getAllGuarantee').get(accountController.getAllGuarantee);
 
 router
     .route('/:id')
     .get(verifyAdmin, accountController.getAccount)
-    .put(verifyAdmin, accountController.editAccount)
+    .patch(verifyAdmin, accountController.editAccount)
     .delete(verifyAdmin, accountController.deleteAccount);
 
 router.route('/create').post(verifyAdmin, accountController.createAccount);

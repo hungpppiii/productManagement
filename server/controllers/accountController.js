@@ -3,19 +3,29 @@ const { Account, Factory, Store, Guarantee } = require('../models');
 const AccountRole = require('../utils/constants/AccountRole');
 const { Op } = require('sequelize');
 
+// @desc      get all account
+// @route     [GET] /api/account/getAllAccount
+// @access    Private/Admin
 const getAllAccount = async (req, res, next) => {
     try {
-        const accounts = await Account.findAll({
-            where: {
-                role: {
-                    [Op.not]: AccountRole.ADMIN,
-                },
-            },
-        });
+        let accounts = await Promise.all([
+            Factory.findAll({
+                attributes: ['name', 'address', 'phone'],
+                include: Account,
+            }),
+            Store.findAll({
+                attributes: ['name', 'address', 'phone'],
+                include: Account,
+            }),
+            Guarantee.findAll({
+                attributes: ['name', 'address', 'phone'],
+                include: Account,
+            }),
+        ]);
 
         return res.status(200).json({
             success: true,
-            data: accounts,
+            data: [...accounts[0], ...accounts[1], ...accounts[2]],
         });
     } catch (error) {
         console.log(error);
@@ -23,6 +33,9 @@ const getAllAccount = async (req, res, next) => {
     }
 };
 
+// @desc      get all account factory
+// @route     [GET] /api/account/getAllFactory
+// @access    Private
 const getAllFactory = async (req, res, next) => {
     try {
         const factories = await Factory.findAll({
@@ -40,6 +53,9 @@ const getAllFactory = async (req, res, next) => {
     }
 };
 
+// @desc      get all account store
+// @route     [GET] /api/account/getAllStore
+// @access    Private
 const getAllStore = async (req, res, next) => {
     try {
         const stores = await Store.findAll({
@@ -57,6 +73,9 @@ const getAllStore = async (req, res, next) => {
     }
 };
 
+// @desc      get all account guarantee
+// @route     [GET] /api/account/getAllGuarantee
+// @access    Private
 const getAllGuarantee = async (req, res, next) => {
     try {
         const guarantees = await Guarantee.findAll({
@@ -74,6 +93,9 @@ const getAllGuarantee = async (req, res, next) => {
     }
 };
 
+// @desc      get account
+// @route     [GET] /api/account/:id
+// @access    Private/Admin
 const getAccount = async (req, res, next) => {
     try {
         const account = await Account.findByPk(req.params.id);
@@ -86,6 +108,9 @@ const getAccount = async (req, res, next) => {
     }
 };
 
+// @desc      create account
+// @route     [POST] /api/account/create
+// @access    Private/Admin
 const createAccount = async (req, res, next) => {
     const transaction = await sequelize.transaction();
     try {
@@ -166,9 +191,12 @@ const createAccount = async (req, res, next) => {
     }
 };
 
+// @desc      update account
+// @route     [PATCH] /api/account/:id
+// @access    Private/Admin
 const editAccount = async (req, res, next) => {
     try {
-        const update = await Account.update(
+        const updated = await Account.update(
             {
                 username: req.body.username,
                 password: req.body.password,
@@ -180,7 +208,8 @@ const editAccount = async (req, res, next) => {
                 },
             },
         );
-        if (update[0] === 1) {
+
+        if (!updated[0]) {
             throw new Error('update account failed');
         }
         return res.status(201).send({
@@ -191,6 +220,9 @@ const editAccount = async (req, res, next) => {
     }
 };
 
+// @desc      delete account
+// @route     [DELETE] /api/account/:id
+// @access    Private/Admin
 const deleteAccount = async (req, res, next) => {
     try {
         const deleteAccount = await Account.destroy({
@@ -200,7 +232,7 @@ const deleteAccount = async (req, res, next) => {
         });
 
         if (!deleteAccount) {
-            throw new Error('Product does not exist');
+            throw new Error('Account does not exist');
         }
 
         return res.status(201).json({
