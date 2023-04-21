@@ -1,53 +1,50 @@
 const { ProductLine } = require('../models');
-const sequelize = require('../config/db');
 
-const getAllProductLine = async (req, res) => {
+// @desc      get all product line
+// @route     [POST] /api/productLine/getAllProductLine
+// @access    Private
+const getAllProductLine = async (req, res, next) => {
     try {
         const productLines = await ProductLine.findAll();
-        res.json(productLines);
+        res.status(200).json({
+            success: true,
+            data: productLines,
+        });
     } catch (error) {
-        return res.status(409).send({
-            error,
-        });
+        next(error);
     }
 };
 
-const addProductLine = async (req, res) => {
-    const data = {
-        name: req.body.name,
-        price: req.body.price,
-        warranty_period: req.body.warranty_period,
-        description: req.body.description,
-    };
-
-    // check dublicate username
-    const productLineData = await ProductLine.findOne({
-        where: {
+// @desc      get all product line
+// @route     [POST] /api/productLine/create
+// @access    Private/Admin
+const createProductLine = async (req, res, next) => {
+    try {
+        const productLine = await ProductLine.create({
             name: req.body.name,
-        },
-    });
-
-    if (productLineData !== null) {
-        return res.status(409).send({
-            message: 'This name productLine already exists',
+            price: req.body.price,
+            warrantyPeriod: req.body.warrantyPeriod,
+            description: req.body.description,
         });
-    } else {
-        // saving the user
-        const productLine = await ProductLine.create(data);
-        if (productLine) {
-            return res.status(201).send({
-                productLine: productLine,
-                message: 'ProductLine registered successfully.',
-            });
-        } else {
-            return res.status(409).send({
-                message: 'Details are not correct',
-            });
+
+        if (!productLine) {
+            throw new Error('Details are not correct');
         }
+
+        return res.status(201).send({
+            success: true,
+            data: productLine,
+        });
+    } catch (error) {
+        console.log(error);
+        return next(error);
     }
 };
 
-const editProductLine = async (req, res, next) => {
+// @desc      update product line
+// @route     [PATCH] /api/productLine/:id
+// @access    Private/Admin
+const updateProductLine = async (req, res, next) => {
     try {
         const update = await ProductLine.update(
             {
@@ -62,22 +59,24 @@ const editProductLine = async (req, res, next) => {
                 },
             },
         );
-        if (update[0] === 1) {
-            return res.status(201).send({
-                message: 'Update successfully.',
-            });
-        } else {
-            return res.status(201).send({
-                message: 'Update fail',
+
+        if (!update[0]) {
+            return next({
+                message: `update product line failed for productLineId - ${req.params.id}`,
             });
         }
-    } catch (error) {
-        return res.status(409).send({
-            error,
+
+        return res.status(201).send({
+            success: true,
         });
+    } catch (error) {
+        return next(error);
     }
 };
 
+// @desc      update product line
+// @route     [DELETE] /api/productLine/:id
+// @access    Private/Admin
 const deleteProductLine = async (req, res, next) => {
     try {
         const deleteProductLine = await ProductLine.destroy({
@@ -85,26 +84,23 @@ const deleteProductLine = async (req, res, next) => {
                 product_line_id: req.params.id,
             },
         });
-        if (deleteProductLine === 1) {
-            return res.status(201).send({
-                message: 'Delete productLine successfully.',
-            });
-        } else {
-            return res.status(201).send({
-                deleteProductLine: deleteProductLine,
-                message: 'Delete productLine fail',
+        if (!deleteProductLine) {
+            return next({
+                message: `delete product line failed for id - ${req.params.id}`,
             });
         }
-    } catch (error) {
-        return res.status(409).send({
-            error,
+
+        return res.status(200).json({
+            success: true,
         });
+    } catch (error) {
+        return next(error);
     }
 };
 
 module.exports = {
     getAllProductLine,
-    addProductLine,
-    editProductLine,
+    createProductLine,
+    updateProductLine,
     deleteProductLine,
 };

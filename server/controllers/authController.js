@@ -4,41 +4,45 @@ const jwt = require('jsonwebtoken');
 // @desc      Login
 // @route     [POST] /api/auth/login
 // @access    Public
-const login = async (req, res) => {
-    const { username, password } = req.body;
+const login = async (req, res, next) => {
+    try {
+        const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(500).send({
-            message: 'Missing account or password',
+        if (!username || !password) {
+            return res.status(500).send({
+                message: 'Missing account or password',
+            });
+        }
+
+        const account = await Account.findOne({
+            where: {
+                username,
+                password,
+            },
         });
-    }
 
-    const account = await Account.findOne({
-        where: {
-            username,
-            password,
-        },
-    });
+        if (!account) {
+            return next({
+                message: 'Account does not exist',
+            });
+        }
 
-    if (!account) {
-        return res.status(500).json({
-            error: 'Account does not exist',
+        const token = jwt.sign(
+            {
+                accountId: account.id,
+            },
+            process.env.SECRET_KEY,
+        );
+
+        res.cookie('token', token);
+
+        res.status(200).json({
+            token,
+            accountRole: account.role,
         });
+    } catch (error) {
+        next(error);
     }
-
-    const token = jwt.sign(
-        {
-            accountId: account.id,
-        },
-        process.env.SECRET_KEY,
-    );
-
-    res.cookie('token', token);
-
-    res.status(200).json({
-        token,
-        accountRole: account.role,
-    });
 };
 
 // @desc      Register

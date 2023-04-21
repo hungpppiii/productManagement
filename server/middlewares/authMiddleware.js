@@ -1,5 +1,5 @@
 const { Account, Factory, Store, Guarantee } = require('../models');
-const accountRule = require('../utils/constants/AccountRule');
+const AccountRole = require('../utils/constants/AccountRole');
 const jwt = require('jsonwebtoken');
 
 const verifyAccount = async (req, res, next) => {
@@ -44,7 +44,7 @@ const verifyAccount = async (req, res, next) => {
 
 const verifyAdmin = async (req, res, next) => {
     try {
-        if (req.accountRole !== accountRule.ADMIN) {
+        if (req.accountRole !== AccountRole.ADMIN) {
             return res.status(403).json({
                 error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
             });
@@ -59,7 +59,7 @@ const verifyAdmin = async (req, res, next) => {
 
 const verifyFactory = async (req, res, next) => {
     try {
-        if (req.accountRole !== accountRule.FACTORY) {
+        if (req.accountRole !== AccountRole.FACTORY) {
             return res.status(403).json({
                 error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
             });
@@ -87,7 +87,7 @@ const verifyFactory = async (req, res, next) => {
 
 const verifyStore = async (req, res, next) => {
     try {
-        if (req.accountRole !== accountRule.STORE) {
+        if (req.accountRole !== AccountRole.STORE) {
             return res.status(403).json({
                 error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
             });
@@ -115,7 +115,7 @@ const verifyStore = async (req, res, next) => {
 
 const verifyGuarantee = async (req, res, next) => {
     try {
-        if (req.accountRole !== accountRule.GUARANTEE) {
+        if (req.accountRole !== AccountRole.GUARANTEE) {
             return res.status(403).json({
                 error: `User role ${res.locals.accountRole} is not authorized to access this routes`,
             });

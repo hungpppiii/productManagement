@@ -7,6 +7,7 @@ const path = require('path');
 const cors = require('cors');
 const route = require('./routes');
 const cookieParser = require('cookie-parser');
+const errorHandler = require('./middlewares/errorHandle');
 
 const app = express();
 
@@ -47,6 +48,10 @@ app.use(bodyParser.json());
 // set static folder
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
+// config router
 route(app);
+
+// error handle middleware
+app.use(errorHandler);
 
 module.exports = app;
