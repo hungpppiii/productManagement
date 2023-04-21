@@ -6,11 +6,11 @@ const router = express.Router();
 
 router.route('/getAllProductLine').get(productLineController.getAllProductLine);
 router
-    .route('/addProductLine')
-    .post(verifyAdmin, productLineController.addProductLine);
+    .route('/create')
+    .post(verifyAdmin, productLineController.createProductLine);
 router
     .route('/:id')
-    .put(verifyAdmin, productLineController.editProductLine)
+    .patch(verifyAdmin, productLineController.updateProductLine)
     .delete(verifyAdmin, productLineController.deleteProductLine);
 
 module.exports = router;

@@ -27,6 +27,8 @@ const WarrantyInformation = WarrantyInformationModel(sequelize, DataTypes);
 Product.hasOne(DistributeInformation, {
     foreignKey: 'product_id',
     allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
 });
 
 Store.hasMany(DistributeInformation, {
@@ -54,6 +56,8 @@ Store.belongsToMany(Factory, {
 Factory.belongsTo(Account, {
     foreignKey: 'account_id',
     allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
 });
 
 // Guarantee association
@@ -68,6 +72,8 @@ Store.belongsToMany(Guarantee, {
 Guarantee.belongsTo(Account, {
     foreignKey: 'account_id',
     allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
 });
 
 // Order association
@@ -110,6 +116,8 @@ Factory.hasMany(Product, {
 ProductLine.hasMany(Product, {
     foreignKey: 'product_line_id',
     allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
 });
 
 Product.belongsTo(ProductLine, {
@@ -126,11 +134,15 @@ Product.belongsTo(Factory, {
 Store.belongsTo(Account, {
     foreignKey: 'account_id',
     allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
 });
 
 //  Warranty Information association
 Product.hasMany(WarrantyInformation, {
     foreignKey: 'product_id',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
 });
 
 Guarantee.hasMany(WarrantyInformation, {

@@ -5,16 +5,14 @@ const {
     Customer,
     Order,
     WarrantyInformation,
-    Guarantee,
 } = require('../models');
 const sequelize = require('../config/db');
 const ProductStatus = require('../utils/constants/ProductStatus');
-const AccountRule = require('../utils/constants/AccountRule');
 
 // @desc      get product list inventory
 // @route     [GET] /api/product/getAllProducts/inventory
 // @access    Private/Factory
-const getAllProductInventory = async (req, res) => {
+const getAllProductInventory = async (req, res, next) => {
     try {
         const factory = res.locals.factory;
 
@@ -32,25 +30,26 @@ const getAllProductInventory = async (req, res) => {
         });
 
         if (!products) {
-            throw new Error();
+            return next({
+                message: `No products found for factory - '${factory.id}'`,
+                statusCode: 404,
+            });
         }
 
         return res.status(200).json({
-            message: 'get products successfully',
+            success: true,
             data: products,
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: `get product failed: ${error}`,
-        });
+        return next(error);
     }
 };
 
 // @desc      get product list error
 // @route     [GET] /api/product/getAllProducts/error
 // @access    Private/Factory
-const getAllProductError = async (req, res) => {
+const getAllProductError = async (req, res, next) => {
     try {
         const factory = res.locals.factory;
 
@@ -68,25 +67,26 @@ const getAllProductError = async (req, res) => {
         });
 
         if (!products) {
-            throw new Error();
+            return next({
+                message: `No products found for factory - '${factory.id}'`,
+                statusCode: 404,
+            });
         }
 
         return res.status(200).json({
-            message: 'get products successfully',
+            success: true,
             data: products,
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: `get product failed: ${error}`,
-        });
+        return next(error);
     }
 };
 
 // @desc      get product list distributed
 // @route     [GET] /api/product/getAllProducts/distributed
 // @access    Private/Store
-const getAllProductDistributed = async (req, res) => {
+const getAllProductDistributed = async (req, res, next) => {
     try {
         const store = res.locals.store;
 
@@ -107,34 +107,27 @@ const getAllProductDistributed = async (req, res) => {
             },
         });
 
-        if (!distributInformations) {
-            throw new Error();
+        if (!distributeInformations) {
+            return next({
+                message: `No distribute information found for store - '${store.id}'`,
+                statusCode: 404,
+            });
         }
 
-        // const products = distributeInformations.map(
-        //     (distributeInfo) => {
-        //         const product = distributeInfo.toJSON().Product;
-        //         product.distributionDate = distributeInfo.distributionDate;
-        //         return product
-        //     }
-        // );
-
         return res.status(200).json({
-            message: 'get products successfully',
+            success: true,
             data: distributeInformations,
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: `get product failed: ${error}`,
-        });
+        return next(error);
     }
 };
 
 // @desc      get product list sold
 // @route     [GET] /api/product/getAllProducts/sold
 // @access    Private/Store
-const getAllProductSold = async (req, res) => {
+const getAllProductSold = async (req, res, next) => {
     try {
         const store = res.locals.store;
 
@@ -163,25 +156,26 @@ const getAllProductSold = async (req, res) => {
         });
 
         if (!orders) {
-            throw new Error();
+            return next({
+                message: `No order information found for store - '${store.id}'`,
+                statusCode: 404,
+            });
         }
 
         return res.status(200).json({
-            message: 'get products successfully',
+            success: true,
             data: orders,
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: `get product failed: ${error}`,
-        });
+        return next(error);
     }
 };
 
 // @desc      get product list warranty
 // @route     [GET] /api/product/getAllProducts/warranty
 // @access    Private/Guarantee
-const getAllProductWarranty = async (req, res) => {
+const getAllProductWarranty = async (req, res, next) => {
     try {
         const guarantee = res.locals.guarantee;
 
@@ -213,25 +207,26 @@ const getAllProductWarranty = async (req, res) => {
         });
 
         if (!warrantyInformations) {
-            throw new Error();
+            return next({
+                message: `No warranty information found for guarantee - '${guarantee.id}'`,
+                statusCode: 404,
+            });
         }
 
         return res.status(200).json({
-            message: 'get products successfully',
+            success: true,
             data: warrantyInformations,
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: `get product failed: ${error}`,
-        });
+        return next(error);
     }
 };
 
 // @desc      get product by id
 // @route     [GET] /api/product/:id
 // @access    Private
-const getProduct = async (req, res) => {
+const getProduct = async (req, res, next) => {
     try {
         const product = await Product.findOne({
             where: {
@@ -245,28 +240,38 @@ const getProduct = async (req, res) => {
             },
         });
 
+        if (!product) {
+            return next({
+                message: `No product found for id - '${req.params.id}'`,
+                statusCode: 404,
+            });
+        }
+
         res.status(200).json({
-            message: 'get product successfully',
+            success: true,
             data: product,
         });
     } catch (error) {
-        return res.status(500).json({
-            error: 'get product failed',
-        });
+        return next(error);
     }
 };
 
 // @desc      create new product
 // @route     [POST] /api/product/create
 // @access    Private/Factory
-const createProduct = async (req, res) => {
+const createProduct = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
-        const { productLineId } = req.body;
-
-        const productLine = await ProductLine.findByPk(productLineId, {
+        const productLine = await ProductLine.findByPk(req.body.productLineId, {
             attributes: ['id', 'name', 'warrantyPeriod', 'description'],
         });
+
+        if (!productLine) {
+            return next({
+                message: `No product line found for id - '${req.body.productLineId}'`,
+                statusCode: 404,
+            });
+        }
 
         const newProduct = await res.locals.factory.createProduct(
             {
@@ -286,71 +291,73 @@ const createProduct = async (req, res) => {
             productLine,
         };
 
-        res.status(200).json({
-            message: 'create product success',
+        res.status(201).json({
+            success: true,
             data,
         });
 
         await t.commit();
     } catch (error) {
         await t.rollback();
-        return res.status(500).json({
-            error: 'product creation failed',
-        });
+        return next(error);
     }
 };
 
 // @desc      create new product
 // @route     [PATCH] /api/product/:id
-// @access    Private/Factory
-const updateProduct = async (req, res) => {};
+// @access    Private
+// const updateProduct = async (req, res, next) => {};
 
 // @desc      create new product
 // @route     [DELETE] /api/product/:id
-// @access    Private
-const deleteProduct = async (req, res) => {
+// @access    Private/Factory
+const deleteProduct = async (req, res, next) => {
     try {
         const id = req.params.id;
 
         if (isNaN(parseInt(id))) {
-            return res.status(400).json({
-                error: 'The product id is incorrect',
+            return next({
+                message: `The product id is incorrect for id - '${id}'`,
+                statusCode: 400,
             });
         }
+
+        const factory_id = res.locals.factory.id;
 
         const deleted = await Product.destroy({
             where: {
                 id,
+                factory_id,
             },
         });
 
-        if (deleted) {
-            return res.status(200).json({
-                message: 'product deletion successfully',
-            });
-        } else {
-            return res.status(200).json({
-                message: 'Product does not exist',
+        if (!deleted) {
+            return next({
+                message: `The factory does not have product with id - '${id}'`,
+                statusCode: 404,
             });
         }
-    } catch (error) {
-        return res.status(500).json({
-            error: 'product deletion failed',
+
+        return res.status(200).json({
+            success: true,
         });
+    } catch (error) {
+        return next(error);
     }
 };
 
 // @desc      product distribution
 // @route     [PATCH] /api/product/distributed/:id
 // @access    Private/Factory
-const productDistribution = async (req, res) => {
+const productDistribution = async (req, res, next) => {
     const transaction = await sequelize.transaction();
     try {
         const product_id = req.params.id;
 
         if (isNaN(parseInt(product_id))) {
-            return res.status(400).json({
-                error: 'The product id is incorrect',
+            return next({
+                message: `The product id is incorrect for id - '${product_id}'`,
+                statusCode: 400,
             });
         }
 
@@ -373,34 +380,35 @@ const productDistribution = async (req, res) => {
             });
 
         if (!created) {
-            throw new Error('Product has been delivered');
+            return next({
+                message: `Product has been delivered for id - '${id}'`,
+            });
         }
 
         await transaction.commit();
 
         return res.status(200).json({
-            message: 'product distributed successfully',
+            success: true,
             data: distributeInfo,
         });
     } catch (error) {
         await transaction.rollback();
-        return res.status(500).json({
-            error,
-        });
+        return next(error);
     }
 };
 
 // @desc      sold product
 // @route     [PATCH] /api/product/sold/:id
 // @access    Private/Store
-const soldProduct = async (req, res) => {
+const soldProduct = async (req, res, next) => {
     const transaction = await sequelize.transaction();
     try {
         const product_id = req.params.id;
 
         if (isNaN(parseInt(product_id))) {
-            return res.status(400).json({
-                error: 'The product id is incorrect',
+            return next({
+                message: `The product id is incorrect for id - '${product_id}'`,
+                statusCode: 400,
             });
         }
 
@@ -432,36 +440,36 @@ const soldProduct = async (req, res) => {
         });
 
         if (!created) {
-            throw new Error('Product has been sold');
+            return next({
+                message: `Product has been sold for id - '${product_id}'`,
+            });
         }
 
         await transaction.commit();
 
         return res.status(200).json({
-            message: 'Product sold successfully',
+            success: true,
             data: orderInfo,
         });
     } catch (error) {
         await transaction.rollback();
         console.log(error);
-
-        return res.status(500).json({
-            error,
-        });
+        return next(error);
     }
 };
 
 // @desc      create new product
 // @route     [PATCH] /api/product/warranty/:id
 // @access    Private/Factory
-const productWarranty = async (req, res) => {
+const productWarranty = async (req, res, next) => {
     const transaction = await sequelize.transaction();
     try {
         const product_id = req.params.id;
 
         if (isNaN(parseInt(product_id))) {
-            return res.status(400).json({
-                error: 'The product id is incorrect',
+            return next({
+                message: `The product id is incorrect for id - '${product_id}'`,
+                statusCode: 400,
             });
         }
 
@@ -481,8 +489,6 @@ const productWarranty = async (req, res) => {
             attribute: ['customer_id'],
         });
 
-        console.log('check', order.customer_id);
-
         const [warrantyInfo, created] = await WarrantyInformation.findOrCreate({
             where: {
                 product_id,
@@ -492,40 +498,53 @@ const productWarranty = async (req, res) => {
             transaction,
         });
 
-        // throw new Error();
-
         if (!created) {
-            throw new Error('Product has been warranty');
+            return next({
+                message: `Product has been warranty for id - '${product_id}'`,
+            });
         }
 
         await transaction.commit();
 
         return res.status(200).json({
-            message: `Change the product status to successfully ${ProductStatus.WARRANTY}`,
+            success: true,
             data: warrantyInfo,
         });
     } catch (error) {
         await transaction.rollback();
         console.log(error);
-        return res.status(500).json({
-            error,
-        });
+        return next(error);
     }
 };
 
-const returnProductAfterWarranty = async (req, res) => {
+// @desc      create new product
+// @route     [PATCH] /api/product/warranty/:id
+// @access    Private/Guarantee
+const returnProductAfterWarranty = async (req, res, next) => {
     const transaction = await sequelize.transaction();
     try {
         const product_id = req.params.id;
 
         if (isNaN(parseInt(product_id))) {
-            return res.status(400).json({
-                error: 'The product id is incorrect',
+            return next({
+                message: `The product id is incorrect for id - '${product_id}'`,
+                statusCode: 400,
             });
         }
 
         // warrantyStatus = ProductStatus.SOLD || ProductStatus.ERROR
         const { warrantyStatus } = req.body;
+
+        if (
+            ![ProductStatus.SOLD, ProductStatus.ERROR].includes(warrantyStatus)
+        ) {
+            return next({
+                message: `warrantyStatus must be '${ProductStatus.SOLD}' or '${ProductStatus.ERROR}'`,
+                statusCode: 400,
+            });
+        }
+
+        const guarantee_id = res.locals.guarantee.id;
 
         await updateProductStatus(
             product_id,
@@ -543,26 +562,31 @@ const returnProductAfterWarranty = async (req, res) => {
             {
                 where: {
                     product_id,
+                    guarantee_id,
                 },
                 transaction,
             },
         );
 
         if (!updated[0]) {
-            throw new Error(`Product cannot be ${warrantyStatus}`);
+            return next({
+                message: `Product cannot be ${warrantyStatus}`,
+            });
         }
 
         await transaction.commit();
 
         return res.status(200).json({
-            message: `Change the product status to successfully ${warrantyStatus}`,
+            success: true,
+            data: {
+                warrantyEndTime,
+                warrantyStatus,
+            },
         });
     } catch (error) {
         await transaction.rollback();
         console.log(error);
-        return res.status(500).json({
-            error,
-        });
+        return next(error);
     }
 };
 
@@ -608,7 +632,6 @@ module.exports = {
     getAllProductWarranty,
     getProduct,
     createProduct,
-    updateProduct,
     deleteProduct,
     productDistribution,
     soldProduct,

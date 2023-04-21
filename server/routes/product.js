@@ -40,7 +40,7 @@ router.get(
 router
     .route('/:id')
     .get(verifyFactory, productController.getProduct)
-    .patch(verifyFactory, productController.updateProduct)
+    // .patch(verifyFactory, productController.updateProduct)
     .delete(verifyFactory, productController.deleteProduct);
 
 router

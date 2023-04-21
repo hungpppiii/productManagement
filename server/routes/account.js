@@ -8,11 +8,21 @@ router
     .get(verifyAdmin, accountController.getAllAccount);
 
 router
-    .route('/:accountID')
-    .get(verifyAdmin, accountController.findOne)
+    .route('/getAllFactory')
+    .get(verifyAdmin, accountController.getAllFactory);
+
+router.route('/getAllStore').get(verifyAdmin, accountController.getAllStore);
+
+router
+    .route('/getAllGuarantee')
+    .get(verifyAdmin, accountController.getAllGuarantee);
+
+router
+    .route('/:id')
+    .get(verifyAdmin, accountController.getAccount)
     .put(verifyAdmin, accountController.editAccount)
     .delete(verifyAdmin, accountController.deleteAccount);
 
-router.route('/addAccount').post(verifyAdmin, accountController.addAccount);
+router.route('/create').post(verifyAdmin, accountController.createAccount);
 
 module.exports = router;
