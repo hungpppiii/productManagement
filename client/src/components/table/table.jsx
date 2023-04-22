@@ -1,10 +1,10 @@
-import { Box } from '@mui/material';
+import { Box } from "@mui/material";
 
-import { DataGrid } from '@mui/x-data-grid';
-import axios from 'axios';
+import { DataGrid } from "@mui/x-data-grid";
+import axios from "axios";
 
-import React from 'react';
-import { useState } from 'react';
+import React from "react";
+import { useState } from "react";
 
 const Table = ({
   columns,
@@ -29,7 +29,7 @@ const Table = ({
     console.log(newRow);
     try {
       const res = await axios.put(
-        'http://localhost:8000/api/toyProduct/',
+        "http://localhost:8000/api/toyProduct/",
         newRow
       );
       console.log(res.data);
@@ -38,7 +38,7 @@ const Table = ({
     }
 
     const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row._id === newRow._id ? updatedRow : row)));
+    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
 
@@ -48,17 +48,17 @@ const Table = ({
         className="box"
         sx={{
           height: height,
-          width: '100%',
+          width: "100%",
         }}
         style={{
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
       >
         <DataGrid
           className="datagid"
           columns={columns}
           rows={rows}
-          getRowId={(row) => row._id || row.id}
+          getRowId={(row) => row.id}
           pagination
           pageSize={pageSize}
           onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}

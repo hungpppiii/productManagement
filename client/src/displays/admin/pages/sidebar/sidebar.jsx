@@ -50,18 +50,20 @@ export default function Sidebar() {
         </ul>
       </div>
 
-      <div className='logout' title='log out'>
-                {/* <FiLogOut className='iconlogout3' /> */}
-                <button onClick={() => {
-                    localStorage.clear()
-                    window.location.href = "http://localhost:3000/"
-                }}>
-                    <div className='logoutWrap'>
-                        <FiLogOut className='iconlogout' />
-                        Log Out
-                    </div>
-                </button>
-            </div>
+      <div className="logout" title="log out">
+        {/* <FiLogOut className='iconlogout3' /> */}
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = "http://localhost:3000/";
+          }}
+        >
+          <div className="logoutWrap">
+            <FiLogOut className="iconlogout" />
+            Log Out
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
