@@ -26,13 +26,13 @@ export default function Sidebar() {
               <span>Statistical</span>
             </li>
           </NavLink>
-
+          {/* 
           <NavLink style={{ textDecoration: "none" }} to="/product">
             <li title="product">
               <RiProductHuntLine className="icon" />
               <span>Product</span>
             </li>
-          </NavLink>
+          </NavLink> */}
 
           <NavLink style={{ textDecoration: "none" }} to="/productLine">
             <li title="productLine">

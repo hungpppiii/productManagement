@@ -3,21 +3,18 @@ import Sidebar from "../sidebar/sidebar";
 import Navbar from "../../../../components/navbar/navbar";
 
 import Table from "../../../../components/table/table";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../../../context/AuthContext";
 import axios from "axios";
 import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
 import SaveIcon from "@mui/icons-material/Save";
+import moment from "moment";
 
 export default function ProductLine() {
+  const { user } = useContext(AuthContext);
   const height = 631;
   const [rows, setRows] = useState([]);
-  // const axiosOptions = {
-  //   headers: {
-  //     "x-access-token": token,
-  //   },
-  // };
 
-  // console.log(rows);
   useEffect(() => {
     const getAllProductLine = async () => {
       try {
@@ -26,13 +23,12 @@ export default function ProductLine() {
           "http://localhost:8080/api/productLine/getAllProductLine",
           {
             headers: {
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOjgsImlhdCI6MTY4MTk5ODY1Mn0.Jp6tPrCmpuaR51LaToHHag_vJsvmLv-3iX_A86RK3z4",
+              Authorization: "Bearer " + user.token,
             },
           }
         );
-        console.log(res.data);
-        setRows(res.data);
+        console.log(res.data.data);
+        setRows(res.data.data);
       } catch (error) {
         console.log("loi");
         console.log(error);
@@ -75,36 +71,60 @@ export default function ProductLine() {
     {
       headerName: "Description",
       field: "description",
-      width: 40,
+      width: 350,
       editable: true,
     },
-    { headerName: "createdAt", field: "createdAt", width: 120, editable: true },
-    { headerName: "updatedAt", field: "updatedAt", width: 120, editable: true },
     {
-      field: "actions",
-      type: "actions",
-      headerName: "Actions",
-      width: 100,
-      cellClassName: "actions",
-      getActions: ({ id }) => {
-        return [
-          <GridActionsCellItem
-            icon={<SaveIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            icon={<SaveIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleClickother(id)}
-            color="inherit"
-          />,
-        ];
+      headerName: "createdAt",
+      field: "createdAt",
+      width: 120,
+      editable: true,
+      renderCell: (params) => {
+        if (params.row.createdAt == null) {
+          return "Null";
+        } else {
+          return moment(params.row?.createdAt).format("DD-MM-YYYY");
+        }
       },
     },
+    {
+      headerName: "updatedAt",
+      field: "updatedAt",
+      width: 120,
+      editable: true,
+      renderCell: (params) => {
+        if (params.row.updatedAt == null) {
+          return "Null";
+        } else {
+          return moment(params.row?.updatedAt).format("DD-MM-YYYY");
+        }
+      },
+    },
+    // {
+    //   field: "actions",
+    //   type: "actions",
+    //   headerName: "Actions",
+    //   width: 100,
+    //   cellClassName: "actions",
+    //   getActions: ({ id }) => {
+    //     return [
+    //       <GridActionsCellItem
+    //         icon={<SaveIcon />}
+    //         label="Edit"
+    //         className="textPrimary"
+    //         onClick={handleClick(id)}
+    //         color="inherit"
+    //       />,
+    //       <GridActionsCellItem
+    //         icon={<SaveIcon />}
+    //         label="Edit"
+    //         className="textPrimary"
+    //         onClick={handleClickother(id)}
+    //         color="inherit"
+    //       />,
+    //     ];
+    //   },
+    // },
   ];
 
   const data = [

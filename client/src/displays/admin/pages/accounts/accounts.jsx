@@ -6,20 +6,28 @@ import Table from "../../../../components/table/table";
 import Product from "../../../../components/product/product";
 import { BiSearchAlt2 } from "react-icons/bi";
 
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Close";
+import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
+
 import React, { useCallback } from "react";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../../context/AuthContext";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import moment from "moment";
 
 export default function AccountManagement() {
   const { token, user } = useContext(AuthContext);
   const height = 615;
+  const [rowModesModel, setRowModesModel] = React.useState({});
+
   const [showCreate, setShowCreate] = useState(false);
   const [errorUsername, setErrorUsername] = useState(false);
   const [rows, setRows] = useState([]);
 
-  console.log(rows);
   const toggleShowCreate = () => {
     setShowCreate(!showCreate);
   };
@@ -43,14 +51,18 @@ export default function AccountManagement() {
           },
         }
       );
-      setRows(res.data.data);
+      setRows(res.data);
       console.log(res.data);
     } catch (error) {
       console.log(error);
     }
   }, []);
 
-  const onSubmit = async (data) => {
+  useEffect(() => {
+    getAllAccount();
+  }, []);
+
+  const onSubmitCreate = async (data) => {
     for (var i = 0; i < rows.length; i++) {
       if (rows[i].username === data.username) {
         setErrorUsername(true);
@@ -62,191 +74,155 @@ export default function AccountManagement() {
     console.log(errorUsername);
     console.log(data);
     setShowCreate(!showCreate);
+    try {
+      if (errorUsername === false) {
+        const res = await axios.post(
+          "http://localhost:8080/api/account/create",
+          data,
+          {
+            headers: {
+              Authorization: "Bearer " + user.token,
+            },
+          }
+        );
+        console.log(res);
+        console.log("gui dlieu");
+        getAllAccount();
+        setShowCreate(false);
+        alert("Create account success");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const processRowUpdate = async (newRow) => {
+    console.log(newRow);
     // try {
-    //   if (errorUsername === false) {
-    //     const res = await axios.post(
-    //       "http://localhost:8000/api/account/add",
-    //       data
-    //     );
-    //     console.log(res);
-    //     console.log("gui dlieu");
-    //     getAllAccount();
-    //     setShowCreate(false);
-    //     alert("Create account success");
-    //   }
+    //   const res = await axios.put(
+    //     "http://localhost:8000/api/toyProduct/",
+    //     newRow
+    //   );
+    //   console.log(res.data);
     // } catch (error) {
     //   console.log(error);
     // }
+
+    const updatedRow = { ...newRow, isNew: false };
+    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+    return updatedRow;
   };
 
-  useEffect(() => {
-    getAllAccount();
-  }, []);
+  const handleEditClick = (row) => () => {
+    // console.log(row.id);
+    setRowModesModel({
+      ...rowModesModel,
+      [row.id]: { mode: GridRowModes.Edit },
+    });
+  };
 
-  const columns_ = [
-    { headerName: "Id", field: "id", width: 250, editable: true },
-    { headerName: "Username", field: "username", width: 120, editable: true },
-    { headerName: "Password", field: "password", width: 120, editable: true },
-    { headerName: "Name", field: "name", width: 200, editable: true },
-    {
-      headerName: "Type Account",
-      field: "typeAccount",
-      width: 150,
-      editable: true,
-    },
-    { headerName: "Location", field: "location", width: 200, editable: true },
-  ];
+  const handleSaveClick = (row) => () => {
+    // console.log(row);
+    setRowModesModel({
+      ...rowModesModel,
+      [row.id]: { mode: GridRowModes.View },
+    });
+  };
+
+  const handleDeleteClick = (row) => () => {
+    // console.log(row);
+    const id = row.id;
+    setRows(rows.filter((row) => row._id !== id));
+  };
+
+  const handleCancelClick = (row) => () => {
+    const id = row.id;
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+
+    const editedRow = rows.find((row) => row.id === id);
+    if (editedRow.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
+    }
+  };
+
   const columns = [
-    { headerName: "Id", field: "Account.id", width: 40, editable: true },
-    // { headerName: "Username", field: "username", width: 175, editable: true },
-    // { headerName: "Password", field: "password", width: 175, editable: true },
-    // { headerName: "Role", field: "role", width: 175, editable: true },
-    // {
-    //   headerName: "createdAt",
-    //   field: "createdAt",
-    //   width: 175,
-    //   editable: true,
-    // },
-    // { headerName: "updatedAt", field: "updatedAt", width: 175, editable: true },
-  ];
-  const data = [
+    { headerName: "Id", field: "id", width: 40, editable: true },
+    { headerName: "Username", field: "username", width: 175, editable: true },
+    { headerName: "Password", field: "password", width: 175, editable: true },
+    { headerName: "Role", field: "role", width: 175, editable: true },
     {
-      id: 2,
-      username: "cs",
-      password: "abc",
-      role: "factory",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
+      headerName: "createdAt",
+      field: "createdAt",
+      width: 175,
+      editable: true,
+      renderCell: (params) => {
+        if (params.row.createdAt == null) {
+          return "Null";
+        } else {
+          return moment(params.row?.createdAt).format("DD-MM-YYYY");
+        }
+      },
     },
     {
-      id: 3,
-      username: "dl",
-      password: "abc",
-      role: "store",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
+      headerName: "updatedAt",
+      field: "updatedAt",
+      width: 175,
+      editable: true,
+      renderCell: (params) => {
+        if (params.row.updatedAt == null) {
+          return "Null";
+        } else {
+          return moment(params.row?.updatedAt).format("DD-MM-YYYY");
+        }
+      },
     },
     {
-      id: 4,
-      username: "tt",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 5,
-      username: "cs2",
-      password: "abc",
-      role: "factory",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 6,
-      username: "dl2",
-      password: "abc",
-      role: "store",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 7,
-      username: "tt2",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 10,
-      username: "test",
-      password: "abc",
-      role: "factory",
-      createdAt: "2023-04-17T00:47:10.000Z",
-      updatedAt: "2023-04-17T00:47:10.000Z",
-    },
-    {
-      id: 11,
-      username: "quyet",
-      password: "abc",
-      role: "factory",
-      createdAt: "2023-04-17T00:57:25.000Z",
-      updatedAt: "2023-04-17T00:57:25.000Z",
-    },
-    {
-      id: 12,
-      username: "quyetStore",
-      password: "abc",
-      role: "store",
-      createdAt: "2023-04-17T01:01:30.000Z",
-      updatedAt: "2023-04-17T01:01:30.000Z",
-    },
-    {
-      id: 13,
-      username: "quyetGuarantee",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-17T01:01:50.000Z",
-      updatedAt: "2023-04-17T01:01:50.000Z",
-    },
-    {
-      id: 14,
-      username: "quyetGuarantee2",
-      password: "abc",
-      role: "guarantee  ",
-      createdAt: "2023-04-17T01:05:18.000Z",
-      updatedAt: "2023-04-17T01:05:18.000Z",
-    },
-    {
-      id: 15,
-      username: "quyetGuarantee3",
-      password: "abc",
-      role: "guarantee  ",
-      createdAt: "2023-04-17T01:07:05.000Z",
-      updatedAt: "2023-04-17T01:07:05.000Z",
-    },
-    {
-      id: 16,
-      username: "quyetGuarantee4",
-      password: "abc",
-      role: "guarantee  ",
-      createdAt: "2023-04-17T01:08:15.000Z",
-      updatedAt: "2023-04-17T01:08:15.000Z",
-    },
-    {
-      id: 17,
-      username: "quyetGuarantee5",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-17T01:08:36.000Z",
-      updatedAt: "2023-04-17T01:08:36.000Z",
-    },
-    {
-      id: 18,
-      username: "quyetGuarantee6",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-17T01:09:15.000Z",
-      updatedAt: "2023-04-17T01:09:15.000Z",
-    },
-    {
-      id: 19,
-      username: "quyetGuarantee7",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-17T01:09:38.000Z",
-      updatedAt: "2023-04-17T01:09:38.000Z",
-    },
-    {
-      id: 20,
-      username: "quyetGuarantee8",
-      password: "abc",
-      role: "guarantee",
-      createdAt: "2023-04-17T01:10:36.000Z",
-      updatedAt: "2023-04-17T01:10:36.000Z",
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ row }) => {
+        const isInEditMode = rowModesModel[row.id]?.mode === GridRowModes.Edit;
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={handleSaveClick(row)}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={handleCancelClick(row)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(row)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(row)}
+            color="inherit"
+          />,
+        ];
+      },
     },
   ];
+
   return (
     <div className="accounts">
       <Sidebar />
@@ -258,14 +234,14 @@ export default function AccountManagement() {
               Create Account
             </button>
           </div>
-          <Table {...{ columns, rows, setRows, height }} />
+          <Table {...{ columns, rows, setRows, height, processRowUpdate }} />
         </div>
       </div>
 
       {showCreate && (
         <div className="model">
           <div onClick={toggleShowCreate} className="overlay"></div>
-          <form className="content" onSubmit={handleSubmit(onSubmit)}>
+          <form className="content" onSubmit={handleSubmit(onSubmitCreate)}>
             <label className="row">
               Username
               <input
