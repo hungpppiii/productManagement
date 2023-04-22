@@ -24,6 +24,7 @@ export default function Products() {
         const res = await axios.get(
           "http://localhost:8000/api/toyProduct/getAll"
         );
+        // console.log(res.data);
         setRows(res.data);
       } catch (error) {
         console.log(error);
@@ -31,8 +32,6 @@ export default function Products() {
     };
     getAllProduct();
   }, []);
-
-  console.log(rows);
 
   if (rows !== null) {
     for (var i = 0; i < rows.length; i++) {
@@ -68,6 +67,7 @@ export default function Products() {
   // console.log(rows);
 
   const handleEditClick = (id) => () => {
+    console.log(id);
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
@@ -77,7 +77,7 @@ export default function Products() {
 
   const handleDeleteClick = (id) => () => {
     console.log(id);
-    setRows(rows.filter((row) => row.id !== id));
+    setRows(rows.filter((row) => row._id !== id));
   };
 
   const handleCancelClick = (id) => () => {
