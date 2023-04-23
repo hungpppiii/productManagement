@@ -5,6 +5,7 @@ const {
     Customer,
     Order,
     WarrantyInformation,
+    Factory,
 } = require('../models');
 const sequelize = require('../config/db');
 const ProductStatus = require('../utils/constants/ProductStatus');
@@ -182,6 +183,26 @@ const getAllProductSold = async (req, res, next) => {
     }
 };
 
+// @desc      get product list order
+// @route     [GET] /api/product/getAllProducts/Order
+// @access    Private/Store
+const getAllProductOrder = async (req, res, next) => {
+    try {
+        const factories = await Store.findAll({
+            attributes: ['name', 'address', 'phone'],
+            include: Account,
+        });
+
+        res.status(200).json({
+            success: true,
+            data: factories,
+        });
+    } catch (error) {
+        console.log(error);
+        return next(error);
+    }
+};
+
 // @desc      get product list warranty
 // @route     [GET] /api/product/getAllProducts/warranty
 // @access    Private/Guarantee
@@ -202,16 +223,23 @@ const getAllProductWarranty = async (req, res, next) => {
                     },
                     attributes: ['id', 'productionDate', 'status'],
                     require: true,
-                    include: {
-                        model: ProductLine,
-                        required: true,
-                        attributes: [
-                            'name',
-                            'warrantyPeriod',
-                            'price',
-                            'description',
-                        ],
-                    },
+                    include: [
+                        {
+                            model: ProductLine,
+                            required: true,
+                            attributes: [
+                                'name',
+                                'warrantyPeriod',
+                                'price',
+                                'description',
+                            ],
+                        },
+                        {
+                            model: Factory,
+                            require: true,
+                            attributes: ['name'],
+                        },
+                    ],
                 },
                 {
                     model: Customer,
@@ -538,8 +566,8 @@ const productWarranty = async (req, res, next) => {
     }
 };
 
-// @desc      create new product
-// @route     [PATCH] /api/product/warranty/:id
+// @desc      return product
+// @route     [PATCH] /api/product/return/:id
 // @access    Private/Guarantee
 const returnProductAfterWarranty = async (req, res, next) => {
     const transaction = await sequelize.transaction();

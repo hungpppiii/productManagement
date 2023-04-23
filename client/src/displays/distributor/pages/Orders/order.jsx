@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import Sidebar from "../Sidebar/sidebar";
 import NavBar from "../../../../components/navbar/navbar";
 import Table from "../../../../components/table/table";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../../../context/AuthContext";
 import axios from "axios";
+import moment from "moment";
 
 import "./order.css";
 
 const Order = () => {
+  const { user } = useContext(AuthContext);
   const height = 600;
   const [showCreate, setShowCreate] = useState(false);
   const [rows, setRows] = useState([]);
@@ -23,65 +26,93 @@ const Order = () => {
     console.log(data);
   };
 
-  useEffect(() => {
-    const getAllProductLine = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:8000/api/receipt/getAllReceipt"
-        );
-        setRows(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getAllProductLine();
-  }, []);
-  console.log(rows);
-
-  if (rows !== null) {
-    for (var i = 0; i < rows.length; i++) {
-      let nameD = rows[i].idDistributor.name;
-      rows[i].Distributor = nameD;
-    }
-  }
-  if (rows !== null) {
-    for (var i = 0; i < rows.length; i++) {
-      let nameO = rows[i].idCustomer.name;
-      rows[i].Customer = nameO;
-    }
-  }
-
-  const columns = [
-    { headerName: "Id Product", field: "_id", width: 240, editable: true },
-    { headerName: "Customer", field: "Customer", width: 120, editable: true },
-    {
-      headerName: "Distributor",
-      field: "Distributor",
-      width: 120,
-      editable: true,
-    },
-    { headerName: "Price", field: "price", width: 120, editable: true },
-    {
-      headerName: "Order Date",
-      field: "orderDate",
-      width: 120,
-      editable: true,
-    },
-    {
-      headerName: "Completion Date",
-      field: "completionDate",
-      width: 120,
-      editable: true,
-    },
-    { headerName: "Status", field: "status", width: 150, editable: true },
-  ];
-
   const [finalClickInfo, setFinalClickInfo] = useState(null);
 
   const handleOnCellClick = (params) => {
     setFinalClickInfo(params);
   };
   console.log(finalClickInfo);
+
+  const getOrder = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/product/getAllProducts/sold",
+        {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        }
+      );
+      console.log(res.data.data);
+      const temp = res.data.data;
+      let result = [];
+      for (let i = 0; i < temp.length; i++) {
+        let Obj = {
+          id: temp[i].Product.id,
+          name: temp[i].Product.ProductLine.name,
+          status: temp[i].Product.status,
+          warrantyPeriod: temp[i].Product.ProductLine.warrantyPeriod,
+          description: temp[i].Product.ProductLine.description,
+          price: temp[i].Product.ProductLine.price,
+          orderDate: temp[i].orderDate,
+          customer: temp[i].Customer.name,
+          address: temp[i].Customer.address,
+          phone: temp[i].Customer.phone,
+        };
+        result.push(Obj);
+      }
+      console.log(result);
+      setRows(result);
+    } catch (error) {
+      console.log("loi");
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getOrder();
+  }, []);
+  console.log(rows);
+
+  const columns = [
+    { headerName: "Id", field: "id", width: 80, editable: true },
+    { headerName: "Name", field: "name", width: 200, editable: true },
+    {
+      headerName: "WarrantyPeriod",
+      field: "warrantyPeriod",
+      width: 120,
+      editable: true,
+    },
+    {
+      headerName: "Description",
+      field: "description",
+      width: 350,
+      editable: true,
+    },
+    { headerName: "Price", field: "price", width: 100, editable: true },
+    {
+      headerName: "Order Date",
+      field: "orderDate",
+      width: 120,
+      editable: true,
+      renderCell: (params) => {
+        if (params.row.orderDate == null) {
+          return "Null";
+        } else {
+          return moment(params.row?.orderDate).format("DD-MM-YYYY");
+        }
+      },
+    },
+    {
+      headerName: "Customer",
+      field: "customer",
+      width: 175,
+      editable: true,
+    },
+    { headerName: "Address", field: "address", width: 150, editable: true },
+    { headerName: "Phone", field: "phone", width: 150, editable: true },
+    { headerName: "Status", field: "status", width: 150, editable: true },
+  ];
 
   return (
     <div className="order">
@@ -105,21 +136,21 @@ const Order = () => {
               {finalClickInfo && (
                 <>
                   <div className="rowOrder firstRow">
-                    <p className="fieldOrder">id : {finalClickInfo._id}</p>
+                    <p className="fieldOrder">id : {finalClickInfo.row.id}</p>
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      ID Product : {finalClickInfo.row.idProduct}
+                      Name of product : {finalClickInfo.row.name}
                     </p>
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      Customer : {finalClickInfo.row.idCustomer.name}
+                      WarrantyPeriod : {finalClickInfo.row.warrantyPeriod}
                     </p>
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      Distributor : {finalClickInfo.row.idDistributor.name}
+                      Description : {finalClickInfo.row.description}
                     </p>
                   </div>
                   <div className="rowOrder">
@@ -129,17 +160,25 @@ const Order = () => {
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      Order date : {finalClickInfo.row.orderDate}
+                      Order date :{" "}
+                      {moment(finalClickInfo.row.orderDate).format(
+                        "DD-MM-YYYY"
+                      )}
                     </p>
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      Completion Date : {finalClickInfo.row.completionDate}
+                      Customer : {finalClickInfo.row.customer}
                     </p>
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      Status : {finalClickInfo.row.status}
+                      Address : {finalClickInfo.row.address}
+                    </p>
+                  </div>
+                  <div className="rowOrder">
+                    <p className="fieldOrder">
+                      Phone : {finalClickInfo.row.phone}
                     </p>
                   </div>
                 </>

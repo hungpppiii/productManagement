@@ -18,6 +18,9 @@ import { AuthContext } from "../../../../context/AuthContext";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import moment from "moment";
+import { Alert, AlertTitle } from "@mui/material";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 
 export default function AccountManagement() {
   const { token, user } = useContext(AuthContext);
@@ -27,6 +30,7 @@ export default function AccountManagement() {
   const [showCreate, setShowCreate] = useState(false);
   const [errorUsername, setErrorUsername] = useState(false);
   const [rows, setRows] = useState([]);
+  const [success, setSuccess] = useState(false);
 
   const toggleShowCreate = () => {
     setShowCreate(!showCreate);
@@ -42,6 +46,7 @@ export default function AccountManagement() {
   });
 
   const getAllAccount = useCallback(async () => {
+    console.log("getall account");
     try {
       const res = await axios.get(
         "http://localhost:8080/api/account/getAllAccount",
@@ -98,45 +103,43 @@ export default function AccountManagement() {
 
   const processRowUpdate = async (newRow) => {
     console.log(newRow);
-    // try {
-    //   const res = await axios.put(
-    //     "http://localhost:8000/api/toyProduct/",
-    //     newRow
-    //   );
-    //   console.log(res.data);
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    const data = {
+      username: newRow.username,
+      password: newRow.password,
+    };
+    try {
+      const res = await axios.patch(
+        "http://localhost:8080/api/account/" + newRow.id,
+        data,
+        {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
 
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
 
-  const handleEditClick = (row) => () => {
-    // console.log(row.id);
-    setRowModesModel({
-      ...rowModesModel,
-      [row.id]: { mode: GridRowModes.Edit },
-    });
+  const handleEditClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (row) => () => {
-    // console.log(row);
-    setRowModesModel({
-      ...rowModesModel,
-      [row.id]: { mode: GridRowModes.View },
-    });
+  const handleSaveClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (row) => () => {
-    // console.log(row);
-    const id = row.id;
-    setRows(rows.filter((row) => row._id !== id));
+  const handleDeleteClick = (id) => () => {
+    console.log(id);
+    setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleCancelClick = (row) => () => {
-    const id = row.id;
+  const handleCancelClick = (id) => () => {
     setRowModesModel({
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
@@ -149,15 +152,20 @@ export default function AccountManagement() {
   };
 
   const columns = [
-    { headerName: "Id", field: "id", width: 40, editable: true },
-    { headerName: "Username", field: "username", width: 175, editable: true },
+    { headerName: "Id", field: "id", width: 40, editable: false },
+    {
+      headerName: "Username",
+      field: "username",
+      width: 175,
+      editable: true,
+    },
     { headerName: "Password", field: "password", width: 175, editable: true },
-    { headerName: "Role", field: "role", width: 175, editable: true },
+    { headerName: "Role", field: "role", width: 175, editable: false },
     {
       headerName: "createdAt",
       field: "createdAt",
       width: 175,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
         if (params.row.createdAt == null) {
           return "Null";
@@ -166,11 +174,12 @@ export default function AccountManagement() {
         }
       },
     },
+
     {
       headerName: "updatedAt",
       field: "updatedAt",
       width: 175,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
         if (params.row.updatedAt == null) {
           return "Null";
@@ -185,20 +194,20 @@ export default function AccountManagement() {
       headerName: "Actions",
       width: 100,
       cellClassName: "actions",
-      getActions: ({ row }) => {
-        const isInEditMode = rowModesModel[row.id]?.mode === GridRowModes.Edit;
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
         if (isInEditMode) {
           return [
             <GridActionsCellItem
               icon={<SaveIcon />}
               label="Save"
-              onClick={handleSaveClick(row)}
+              onClick={handleSaveClick(id)}
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
               label="Cancel"
               className="textPrimary"
-              onClick={handleCancelClick(row)}
+              onClick={handleCancelClick(id)}
               color="inherit"
             />,
           ];
@@ -209,13 +218,13 @@ export default function AccountManagement() {
             icon={<EditIcon />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(row)}
+            onClick={handleEditClick(id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
-            onClick={handleDeleteClick(row)}
+            onClick={handleDeleteClick(id)}
             color="inherit"
           />,
         ];
@@ -227,6 +236,17 @@ export default function AccountManagement() {
     <div className="accounts">
       <Sidebar />
       <div className="wrapper">
+        {/* {success &&
+          // <Alert
+          //   onClose={() => {
+          //     setSuccess(!success);
+          //   }}
+          //   className="alert"
+          //   id="al"
+          // >
+          //   This is a success alert — check it out!
+          // </Alert>
+          alert("thanh")} */}
         <Navbar />
         <div className="mainAccount">
           <div className="navAccount">
@@ -234,7 +254,19 @@ export default function AccountManagement() {
               Create Account
             </button>
           </div>
-          <Table {...{ columns, rows, setRows, height, processRowUpdate }} />
+
+          <Table
+            {...{
+              columns,
+              rows,
+              setRows,
+              height,
+              setRows,
+              setRowModesModel,
+              rowModesModel,
+              processRowUpdate,
+            }}
+          />
         </div>
       </div>
 
@@ -293,7 +325,7 @@ export default function AccountManagement() {
             <label className="row">
               Role
               <select {...register("role")}>
-                <option value="admin">Admin</option>
+                {/* <option value="admin">Admin</option> */}
                 <option value="store">Store</option>
                 <option value="factory">Factory</option>
                 <option value="guarantee">Guarantee</option>

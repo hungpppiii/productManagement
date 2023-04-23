@@ -61,3 +61,15 @@ small {
     /* width: 50% !important; */
     /* max-width: 50% !important; */
 }
+
+.alert {
+    position: absolute !important;
+   width: 20%;
+   top: 0;
+   right: 40 !important;
+   margin-left: 40;
+}
+
+#al {
+    left: 40;
+}

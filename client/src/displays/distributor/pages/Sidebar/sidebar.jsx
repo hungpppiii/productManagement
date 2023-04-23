@@ -32,12 +32,12 @@ export default function Sidebar() {
             </li>
           </NavLink>
 
-          <NavLink style={{ textDecoration: "none" }} to="/recallProductions">
+          {/* <NavLink style={{ textDecoration: "none" }} to="/recallProductions">
             <li title="recallProductions">
               <AiOutlineUnorderedList className="icon" />
               <span>Recall Productions</span>
             </li>
-          </NavLink>
+          </NavLink> */}
 
           <NavLink style={{ textDecoration: "none" }} to="/order">
             <li title="order">
@@ -48,14 +48,16 @@ export default function Sidebar() {
         </ul>
       </div>
 
-      <div className='logout' title='log out'>
+      <div className="logout" title="log out">
         {/* <FiLogOut className='iconlogout3' /> */}
-        <button onClick={() => {
-          localStorage.clear()
-          window.location.href = "http://localhost:3000/"
-        }}>
-          <div className='logoutWrap'>
-            <FiLogOut className='iconlogout' />
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = "http://localhost:3000/";
+          }}
+        >
+          <div className="logoutWrap">
+            <FiLogOut className="iconlogout" />
             Log Out
           </div>
         </button>

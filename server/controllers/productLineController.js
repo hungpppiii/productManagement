@@ -50,25 +50,26 @@ const updateProductLine = async (req, res, next) => {
             {
                 name: req.body.name,
                 price: req.body.price,
-                warranty_period: req.body.warranty_period,
+                warrantyPeriod: req.body.warranty_period,
                 description: req.body.description,
             },
             {
                 where: {
-                    product_line_id: req.params.id,
+                    id: req.params.id,
                 },
             },
         );
+        res.json(update);
 
-        if (!update[0]) {
-            return next({
-                message: `update product line failed for productLineId - ${req.params.id}`,
-            });
-        }
+        // if (!update[0]) {
+        //     return next({
+        //         message: `update product line failed for productLineId - ${req.params.id}`,
+        //     });
+        // }
 
-        return res.status(201).send({
-            success: true,
-        });
+        // return res.status(201).send({
+        //     success: true,
+        // });
     } catch (error) {
         return next(error);
     }
