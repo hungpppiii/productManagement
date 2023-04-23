@@ -1,5 +1,9 @@
 import axios from "axios";
-import { LoginStart, LoginSuccess, LoginFailure } from "./context/AuthActions";
+import {
+  LoginStart,
+  LoginSuccess,
+  LoginFailure
+} from "./context/AuthActions";
 
 export const loginCall = async (userCredential, dispatch) => {
   dispatch(LoginStart(userCredential));
@@ -7,7 +11,9 @@ export const loginCall = async (userCredential, dispatch) => {
   try {
     const res = await axios.post(
       "http://localhost:8080/api/auth/login",
-      userCredential
+      userCredential, {
+        withCredentials: true,
+      }
     );
     console.log(res.data, "login data");
     if (res.data.token !== undefined) {

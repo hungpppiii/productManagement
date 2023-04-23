@@ -24,7 +24,7 @@ const getAllProductInventory = async (req, res, next) => {
             include: {
                 model: ProductLine,
                 required: true,
-                attributes: ['name', 'warrantyPeriod', 'description'],
+                attributes: ['name', 'warrantyPeriod', 'price', 'description'],
             },
             required: true,
         });
@@ -61,7 +61,7 @@ const getAllProductError = async (req, res, next) => {
             include: {
                 model: ProductLine,
                 required: true,
-                attributes: ['name', 'warrantyPeriod', 'description'],
+                attributes: ['name', 'warrantyPeriod', 'price', 'description'],
             },
             required: true,
         });
@@ -101,7 +101,12 @@ const getAllProductDistributed = async (req, res, next) => {
                 include: {
                     model: ProductLine,
                     required: true,
-                    attributes: ['name', 'warrantyPeriod', 'description'],
+                    attributes: [
+                        'name',
+                        'warrantyPeriod',
+                        'price',
+                        'description',
+                    ],
                 },
                 require: true,
             },
@@ -144,7 +149,12 @@ const getAllProductSold = async (req, res, next) => {
                     include: {
                         model: ProductLine,
                         required: true,
-                        attributes: ['name', 'warrantyPeriod', 'description'],
+                        attributes: [
+                            'name',
+                            'warrantyPeriod',
+                            'price',
+                            'description',
+                        ],
                     },
                 },
                 {
@@ -195,7 +205,12 @@ const getAllProductWarranty = async (req, res, next) => {
                     include: {
                         model: ProductLine,
                         required: true,
-                        attributes: ['name', 'warrantyPeriod', 'description'],
+                        attributes: [
+                            'name',
+                            'warrantyPeriod',
+                            'price',
+                            'description',
+                        ],
                     },
                 },
                 {
@@ -236,7 +251,7 @@ const getProduct = async (req, res, next) => {
             include: {
                 model: ProductLine,
                 required: true,
-                attributes: ['name', 'warrantyPeriod', 'description'],
+                attributes: ['name', 'warrantyPeriod', 'price', 'description'],
             },
         });
 
@@ -263,7 +278,13 @@ const createProduct = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
         const productLine = await ProductLine.findByPk(req.body.productLineId, {
-            attributes: ['id', 'name', 'warrantyPeriod', 'description'],
+            attributes: [
+                'id',
+                'name',
+                'price',
+                'warrantyPeriod',
+                'description',
+            ],
         });
 
         if (!productLine) {

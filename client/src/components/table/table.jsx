@@ -1,10 +1,10 @@
-import { Box } from "@mui/material";
+import { Box } from '@mui/material';
 
-import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
+import { DataGrid } from '@mui/x-data-grid';
+import axios from 'axios';
 
-import React from "react";
-import { useState } from "react";
+import React from 'react';
+import { useState } from 'react';
 
 const Table = ({
   columns,
@@ -15,6 +15,7 @@ const Table = ({
   setRowModesModel,
   handleOnCellClick,
   processRowUpdate,
+  apiRef,
 }) => {
   const [pageSize, setPageSize] = useState(10);
 
@@ -49,10 +50,10 @@ const Table = ({
         className="box"
         sx={{
           height: height,
-          width: "100%",
+          width: '100%',
         }}
         style={{
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
       >
         <DataGrid
@@ -72,6 +73,8 @@ const Table = ({
           processRowUpdate={processRowUpdate}
           experimentalFeatures={{ newEditingApi: true }}
           onCellClick={handleOnCellClick}
+          getRowHeight={() => 'auto'}
+          apiRef={apiRef}
         />
       </Box>
     </div>

@@ -1,4 +1,3 @@
-
 .products {
     display: flex;
     height: 97%;
@@ -11,25 +10,25 @@
 
 .mainProduct {
     margin-top: 20px;
-    
+
 }
 
 .addProduct {
     display: flex;
     width: 70%;
-    justify-content:flex-start;
+    justify-content: flex-start;
     margin-right: auto;
     margin-left: auto;
 }
 
-.addProduct > button {
+.addProduct>button {
     border-radius: 10px;
     height: 50px;
     width: 100px;
     border: 0.5px solid lightgray;
 }
 
-.addProduct > button:hover {
+.addProduct>button:hover {
     background: lightgray;
 }
 
@@ -37,12 +36,14 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
 
-.modelProduct, .overlayProduct {
+.modelProduct,
+.overlayProduct {
     width: 100vw;
     height: 100vh;
     top: 0;
@@ -50,11 +51,12 @@
     right: 0;
     bottom: 0;
     position: absolute;
-} 
+}
 
 .overlayProduct {
-    background: rgba(49,49,49,0.8);
+    background: rgba(49, 49, 49, 0.8);
 }
+
 .modelProduct {
     animation: fadeIn ease-in 0.3s;
 }
@@ -67,13 +69,14 @@
     margin-top: 10px;
 }
 
-label > input, label > select {
+label>input,
+label>select {
     border-radius: 10px;
     height: 40px;
     margin-top: 5px !important;
 }
 
-label > select {
+label>select {
     height: 40px;
     padding: 6px;
 }
@@ -89,4 +92,9 @@ input[type="submit"] {
 
 input.submit:hover {
     background: rgb(146, 146, 146);
+}
+
+.create-button {
+    margin-left: auto;
+    margin-right: 12px;
 }

@@ -41,7 +41,7 @@ const getAllAccount = async (req, res, next) => {
 const getAllFactory = async (req, res, next) => {
     try {
         const factories = await Factory.findAll({
-            attributes: ['name', 'address', 'phone'],
+            attributes: ['id', 'name', 'address', 'phone'],
             include: Account,
         });
 
@@ -61,7 +61,7 @@ const getAllFactory = async (req, res, next) => {
 const getAllStore = async (req, res, next) => {
     try {
         const stores = await Store.findAll({
-            attributes: ['name', 'address', 'phone'],
+            attributes: ['id', 'name', 'address', 'phone'],
             include: Account,
         });
 
@@ -81,7 +81,7 @@ const getAllStore = async (req, res, next) => {
 const getAllGuarantee = async (req, res, next) => {
     try {
         const guarantees = await Guarantee.findAll({
-            attributes: ['name', 'address', 'phone'],
+            attributes: ['id', 'name', 'address', 'phone'],
             include: Account,
         });
 
