@@ -14,6 +14,7 @@ const Table = ({
   rowModesModel,
   setRowModesModel,
   handleOnCellClick,
+  processRowUpdate,
 }) => {
   const [pageSize, setPageSize] = useState(10);
 
@@ -25,22 +26,22 @@ const Table = ({
     event.defaultMuiPrevented = true;
   };
 
-  const processRowUpdate = async (newRow) => {
-    console.log(newRow);
-    try {
-      const res = await axios.put(
-        "http://localhost:8000/api/toyProduct/",
-        newRow
-      );
-      console.log(res.data);
-    } catch (error) {
-      console.log(error);
-    }
+  // const processRowUpdate = async (newRow) => {
+  //   console.log(newRow);
+  //   try {
+  //     const res = await axios.put(
+  //       "http://localhost:8000/api/toyProduct/",
+  //       newRow
+  //     );
+  //     console.log(res.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
 
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
+  //   const updatedRow = { ...newRow, isNew: false };
+  //   setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+  //   return updatedRow;
+  // };
 
   return (
     <div className="mainProduct">

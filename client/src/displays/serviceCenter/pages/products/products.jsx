@@ -18,17 +18,7 @@ export default function Warehouse() {
   const { user } = useContext(AuthContext);
   const height = 631;
   const [rowModesModel, setRowModesModel] = React.useState({});
-  const [rows, setRows] = useState([
-    {
-      id: 1,
-      name: "q",
-      status: "q",
-      warranty_start_time: 22 / 12,
-      warranty_end_time: 22 / 12,
-      customer_name: "q",
-      Move: "a",
-    },
-  ]);
+  const [rows, setRows] = useState([]);
   const [ShowFormMove, setShowFormMove] = useState(false);
   const [productMove, setProductMove] = useState({});
   const [factory, setFactory] = useState();
@@ -41,27 +31,42 @@ export default function Warehouse() {
   } = useForm({
     mode: "onTouched",
   });
-  // useEffect(() => {
-  //   const getAllProduct = async () => {
-  //     try {
-  //       console.log("fetch");
-  //       const res = await axios.get(
-  //         "http://localhost:8080/api/product/getAllProducts/warranty",
-  //         {
-  //           headers: {
-  //             Authorization: "Bearer " + user.token,
-  //           },
-  //         }
-  //       );
-  //       console.log(res.data);
-  //       setRows(res.data);
-  //     } catch (error) {
-  //       console.log("loi");
-  //       console.log(error);
-  //     }
-  //   };
-  //   getAllProduct();
-  // }, []);
+
+  useEffect(() => {
+    const getAllProduct = async () => {
+      try {
+        console.log("fetch");
+        const res = await axios.get(
+          "http://localhost:8080/api/product/getAllProducts/warranty",
+          {
+            headers: {
+              Authorization: "Bearer " + user.token,
+            },
+          }
+        );
+        console.log(res.data.data);
+        const temp = res.data.data;
+        let result = [];
+        for (let i = 0; i < temp.length; i++) {
+          let Obj = {
+            id: temp[i].Product.id,
+            name: temp[i].Product.ProductLine.name,
+            status: temp[i].Product.status,
+            warranty_start_time: temp[i].warrantyStartTime,
+            // warranty_end_time
+            customer_name: temp[i].Customer.name,
+          };
+          result.push(Obj);
+        }
+        console.log(result);
+        setRows(result);
+      } catch (error) {
+        console.log("loi");
+        console.log(error);
+      }
+    };
+    getAllProduct();
+  }, []);
 
   useEffect(() => {
     const getAllFactory = async () => {
@@ -90,8 +95,25 @@ export default function Warehouse() {
     getAllFactory();
   }, []);
 
+  const processRowUpdate = async (newRow) => {
+    console.log(newRow);
+    // try {
+    //   const res = await axios.put(
+    //     "http://localhost:8000/api/toyProduct/",
+    //     newRow
+    //   );
+    //   console.log(res.data);
+    // } catch (error) {
+    //   console.log(error);
+    // }
+
+    const updatedRow = { ...newRow, isNew: false };
+    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+    return updatedRow;
+  };
+
   const handleEditClick = (row) => () => {
-    console.log(row);
+    // console.log(row);
     setRowModesModel({
       ...rowModesModel,
       [row.id]: { mode: GridRowModes.Edit },
@@ -99,7 +121,7 @@ export default function Warehouse() {
   };
 
   const handleSaveClick = (row) => () => {
-    console.log(row);
+    // console.log(row);
     setRowModesModel({
       ...rowModesModel,
       [row.id]: { mode: GridRowModes.View },
@@ -148,19 +170,19 @@ export default function Warehouse() {
       renderCell: (params) =>
         moment(params.row.warranty_start_time).format("DD-MM-YYYY"),
     },
-    {
-      title: "End time",
-      field: "warranty_end_time",
-      width: 175,
-      editable: false,
-      renderCell: (params) => {
-        if (params.row.warranty_end_time == null) {
-          return "Null";
-        } else {
-          return moment(params.row?.warranty_end_time).format("DD-MM-YYYY");
-        }
-      },
-    },
+    // {
+    //   title: "End time",
+    //   field: "warranty_end_time",
+    //   width: 175,
+    //   editable: false,
+    //   renderCell: (params) => {
+    //     if (params.row.warranty_end_time == null) {
+    //       return "Null";
+    //     } else {
+    //       return moment(params.row?.warranty_end_time).format("DD-MM-YYYY");
+    //     }
+    //   },
+    // },
     { title: "Customer", field: "customer_name", width: 175, editable: false },
     {
       title: "Move",
@@ -221,7 +243,7 @@ export default function Warehouse() {
             rows,
             setRows,
             height,
-
+            processRowUpdate,
             rowModesModel,
             setRowModesModel,
           }}

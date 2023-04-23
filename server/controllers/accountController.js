@@ -8,25 +8,27 @@ const { Op } = require('sequelize');
 // @access    Private/Admin
 const getAllAccount = async (req, res, next) => {
     try {
-        let accounts = await Promise.all([
-            Factory.findAll({
-                attributes: ['name', 'address', 'phone'],
-                include: Account,
-            }),
-            Store.findAll({
-                attributes: ['name', 'address', 'phone'],
-                include: Account,
-            }),
-            Guarantee.findAll({
-                attributes: ['name', 'address', 'phone'],
-                include: Account,
-            }),
-        ]);
+        // let accounts = await Promise.all([
+        //     Factory.findAll({
+        //         attributes: ['name', 'address', 'phone'],
+        //         include: Account,
+        //     }),
+        //     Store.findAll({
+        //         attributes: ['name', 'address', 'phone'],
+        //         include: Account,
+        //     }),
+        //     Guarantee.findAll({
+        //         attributes: ['name', 'address', 'phone'],
+        //         include: Account,
+        //     }),
+        // ]);
 
-        return res.status(200).json({
-            success: true,
-            data: [...accounts[0], ...accounts[1], ...accounts[2]],
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     data: [...accounts[0], ...accounts[1], ...accounts[2]],
+        // });
+        const accounts = await Account.findAll();
+        res.status(200).json(accounts);
     } catch (error) {
         console.log(error);
         return next(error);
