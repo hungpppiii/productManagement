@@ -117,6 +117,7 @@ export default function AccountManagement() {
           },
         }
       );
+      alert("Thay đổi thông tin thành công!");
     } catch (error) {
       console.log(error);
     }
@@ -236,17 +237,6 @@ export default function AccountManagement() {
     <div className="accounts">
       <Sidebar />
       <div className="wrapper">
-        {/* {success &&
-          // <Alert
-          //   onClose={() => {
-          //     setSuccess(!success);
-          //   }}
-          //   className="alert"
-          //   id="al"
-          // >
-          //   This is a success alert — check it out!
-          // </Alert>
-          alert("thanh")} */}
         <Navbar />
         <div className="mainAccount">
           <div className="navAccount">

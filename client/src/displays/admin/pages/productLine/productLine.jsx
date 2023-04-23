@@ -3,7 +3,7 @@ import Sidebar from "../sidebar/sidebar";
 import Navbar from "../../../../components/navbar/navbar";
 
 import Table from "../../../../components/table/table";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from "../../../../context/AuthContext";
 import axios from "axios";
 import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
@@ -12,6 +12,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import moment from "moment";
+import { useForm } from "react-hook-form";
 
 export default function ProductLine() {
   const { user } = useContext(AuthContext);
@@ -19,27 +20,78 @@ export default function ProductLine() {
   const [rows, setRows] = useState([]);
   const [rowModesModel, setRowModesModel] = useState({});
 
+  const [showCreate, setShowCreate] = useState(false);
+  const [errorUsername, setErrorUsername] = useState(false);
+
+  const toggleShowCreate = () => {
+    setShowCreate(!showCreate);
+  };
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
+    mode: "onTouched",
+  });
+
+  const getAllProductLine = useCallback(async () => {
+    try {
+      console.log("fetch");
+      const res = await axios.get(
+        "http://localhost:8080/api/productLine/getAllProductLine",
+        {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        }
+      );
+      console.log(res.data.data);
+      setRows(res.data.data);
+    } catch (error) {
+      console.log("loi");
+      console.log(error);
+    }
+  });
   useEffect(() => {
-    const getAllProductLine = async () => {
-      try {
-        console.log("fetch");
-        const res = await axios.get(
-          "http://localhost:8080/api/productLine/getAllProductLine",
+    getAllProductLine();
+  }, []);
+
+  const onSubmitCreate = async (data) => {
+    console.log(data);
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].name === data.name) {
+        setErrorUsername(true);
+        console.log(rows[i].name);
+        return;
+      } else {
+        setErrorUsername(false);
+      }
+    }
+    // console.log(errorUsername);
+    // console.log(data);
+    // setShowCreate(!showCreate);
+    try {
+      if (errorUsername === false) {
+        const res = await axios.post(
+          "http://localhost:8080/api/productLine/create",
+          data,
           {
             headers: {
               Authorization: "Bearer " + user.token,
             },
           }
         );
-        console.log(res.data.data);
-        setRows(res.data.data);
-      } catch (error) {
-        console.log("loi");
-        console.log(error);
+        console.log(res);
+        getAllProductLine();
+        setShowCreate(false);
+        alert("Create ProductLine success");
       }
-    };
-    getAllProductLine();
-  }, []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const processRowUpdate = async (newRow) => {
     const data = {
@@ -59,6 +111,7 @@ export default function ProductLine() {
           },
         }
       );
+      alert("Thay đổi thông tin thành công!");
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -180,61 +233,76 @@ export default function ProductLine() {
     },
   ];
 
-  const data = [
-    {
-      id: 1,
-      name: "điện thoại samsung a73",
-      price: 10000000,
-      warrantyPeriod: 12,
-      description: "dòng điện thoại phân khúc tầm trung của samsung",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 2,
-      name: "điện thoại samsung s50 ultra",
-      price: 25000000,
-      warrantyPeriod: 24,
-      description: "dòng điện thoại phân khúc cao cấp của samsung",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 3,
-      name: "điện thoại xiaomi redmi 10x",
-      price: 5700000,
-      warrantyPeriod: 12,
-      description: "dòng điện thoại giá rẻ hiệu năng mạnh của xiaomi",
-      createdAt: "2023-04-12T00:00:00.000Z",
-      updatedAt: "2023-04-12T00:00:00.000Z",
-    },
-    {
-      id: 4,
-      name: "điện thoại iphone13",
-      price: 10000000,
-      warrantyPeriod: null,
-      description: "dòng điện thoại phân khúc cao của iphone",
-      createdAt: "2023-04-16T04:34:00.000Z",
-      updatedAt: "2023-04-16T04:44:12.000Z",
-    },
-  ];
   return (
     <div className="productLine">
       <Sidebar />
       <div className="wrapper">
         <Navbar />
-        <Table
-          {...{
-            columns,
-            rows,
-            setRows,
-            height,
-            rowModesModel,
-            setRowModesModel,
-            processRowUpdate,
-          }}
-        />
+        <div className="mainAccount">
+          <div className="navAccount">
+            <button className="createAccount" onClick={toggleShowCreate}>
+              Create ProductLine
+            </button>
+          </div>
+
+          <Table
+            {...{
+              columns,
+              rows,
+              setRows,
+              height,
+              rowModesModel,
+              setRowModesModel,
+              processRowUpdate,
+            }}
+          />
+        </div>
       </div>
+
+      {showCreate && (
+        <div className="model">
+          <div onClick={toggleShowCreate} className="overlay"></div>
+          <form className="content" onSubmit={handleSubmit(onSubmitCreate)}>
+            <label className="row">
+              Name of ProductLine
+              <input
+                {...register("name", { required: true })}
+                placeholder="Enter productLine name"
+              />
+              <small>{errors.name && "This field is required"}</small>
+              {errorUsername && <small>{"ProductLine must be unique"}</small>}
+            </label>
+            <label className="row">
+              Price
+              <input
+                {...register("price", { required: true })}
+                placeholder="Enter price"
+              />
+              <small>
+                {errors.price?.type === "required" && "This field is required"}
+              </small>
+            </label>
+            <label className="row">
+              WarrantyPeriod
+              <input
+                {...register("warrantyPeriod", { required: true })}
+                placeholder="enter warrantyPeriod"
+              />
+              <small>{errors.warrantyPeriod && "This field is required"}</small>
+            </label>
+            <label className="row">
+              Description
+              <input
+                {...register("description", { required: true })}
+                placeholder="enter description"
+              />
+              <small>{errors.description && "This field is required"}</small>
+            </label>
+
+            <input type="submit" className="submitAccount" />
+          </form>
+        </div>
+      )}
     </div>
   );
 }
