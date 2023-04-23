@@ -1,29 +1,60 @@
-import React, { useCallback } from "react";
-import { useForm } from "react-hook-form";
+import React, { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 
-import Sidebar from "../Sidebar/sidebar";
-import NavBar from "../../../../components/navbar/navbar";
-import Table from "../../../../components/table/table";
-import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../../../../context/AuthContext";
-import axios from "axios";
-import moment from "moment";
+import Sidebar from '../Sidebar/sidebar';
+import NavBar from '../../../../components/navbar/navbar';
+import Table from '../../../../components/table/table';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../../../../context/AuthContext';
+import axios from 'axios';
+import moment from 'moment';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { GridActionsCellItem } from '@mui/x-data-grid';
+import {
+  Box,
+  Modal,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
 
-import "./order.css";
+import { getGuaranteeAPI, warrantyProductAPI } from '../../../../API/api';
+
+import './order.css';
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: '#fce4ec',
+  border: '2px solid #000',
+  borderRadius: 5,
+  boxShadow: 24,
+  p: 4,
+};
 
 const Order = () => {
   const { user } = useContext(AuthContext);
   const height = 600;
-  const [showCreate, setShowCreate] = useState(false);
   const [rows, setRows] = useState([]);
-  const { register, handleSubmit } = useForm();
+  const [guaranteeId, setGuaranteeId] = React.useState('');
+  const [guarantees, setGuarantees] = React.useState([]);
+  const [open, setOpen] = React.useState(false);
+  const [selectProductId, setSelectProductId] = React.useState('');
 
-  const toggleShowCreate = () => {
-    setShowCreate(!showCreate);
+  const handleChange = (event) => {
+    setGuaranteeId(event.target.value);
+  };
+  const handleOpen = (typeForm) => {
+    setOpen(true);
   };
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const [finalClickInfo, setFinalClickInfo] = useState(null);
@@ -36,10 +67,10 @@ const Order = () => {
   const getOrder = useCallback(async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8080/api/product/getAllProducts/sold",
+        'http://localhost:8080/api/product/getAllProducts/sold',
         {
           headers: {
-            Authorization: "Bearer " + user.token,
+            Authorization: 'Bearer ' + user.token,
           },
         }
       );
@@ -64,54 +95,105 @@ const Order = () => {
       console.log(result);
       setRows(result);
     } catch (error) {
-      console.log("loi");
+      console.log('loi');
       console.log(error);
     }
   }, []);
 
+  const getGuarantees = useCallback(async () => {
+    try {
+      const result = await getGuaranteeAPI();
+      console.log('get store', result.data);
+      if (result.success) setGuarantees(result.data);
+    } catch (error) {
+      console.log('error fetch store', error);
+      setGuarantees();
+    }
+  }, []);
+
   useEffect(() => {
+    getGuarantees();
     getOrder();
   }, []);
   console.log(rows);
 
+  const handleWarrantyProduct = async () => {
+    console.log(selectProductId, {
+      guaranteeId,
+    });
+    const success = await warrantyProductAPI(selectProductId, {
+      guaranteeId,
+    });
+    if (success) {
+      await getOrder();
+      handleClose();
+      console.log('success: ', success);
+    } else {
+      console.log('error: ', success);
+    }
+  };
+
+  const openFormWarrantyProduct = async (id) => {
+    console.log('product id', id);
+    setSelectProductId(id);
+    handleOpen(0);
+  };
+
   const columns = [
-    { headerName: "Id", field: "id", width: 80, editable: true },
-    { headerName: "Name", field: "name", width: 200, editable: true },
+    { headerName: 'Id', field: 'id', width: 80, editable: true },
+    { headerName: 'Name', field: 'name', width: 200, editable: true },
     {
-      headerName: "WarrantyPeriod",
-      field: "warrantyPeriod",
+      headerName: 'WarrantyPeriod',
+      field: 'warrantyPeriod',
       width: 120,
       editable: true,
     },
     {
-      headerName: "Description",
-      field: "description",
+      headerName: 'Description',
+      field: 'description',
       width: 350,
       editable: true,
     },
-    { headerName: "Price", field: "price", width: 100, editable: true },
+    { headerName: 'Price', field: 'price', width: 100, editable: true },
     {
-      headerName: "Order Date",
-      field: "orderDate",
+      headerName: 'Order Date',
+      field: 'orderDate',
       width: 120,
       editable: true,
       renderCell: (params) => {
         if (params.row.orderDate == null) {
-          return "Null";
+          return 'Null';
         } else {
-          return moment(params.row?.orderDate).format("DD-MM-YYYY");
+          return moment(params.row?.orderDate).format('DD-MM-YYYY');
         }
       },
     },
     {
-      headerName: "Customer",
-      field: "customer",
+      headerName: 'Customer',
+      field: 'customer',
       width: 175,
       editable: true,
     },
-    { headerName: "Address", field: "address", width: 150, editable: true },
-    { headerName: "Phone", field: "phone", width: 150, editable: true },
-    { headerName: "Status", field: "status", width: 150, editable: true },
+    { headerName: 'Address', field: 'address', width: 150, editable: true },
+    { headerName: 'Phone', field: 'phone', width: 150, editable: true },
+    { headerName: 'Status', field: 'status', width: 150, editable: true },
+    {
+      headerName: 'Action',
+      type: 'actions',
+      width: 100,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        return [
+          <GridActionsCellItem
+            icon={<LocalShippingIcon />}
+            label="Distribute"
+            className="textPrimary"
+            onClick={() => openFormWarrantyProduct(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
 
   return (
@@ -119,6 +201,42 @@ const Order = () => {
       <Sidebar />
       <div className="wrapper">
         <NavBar />
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Box sx={{ mb: 5, fontWeight: '1000', fontSize: '1.5rem' }}>
+              {'Chọn trung tâm bảo hành'}
+            </Box>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">
+                {'Guarantee'}
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={guaranteeId}
+                onChange={handleChange}
+              >
+                {guarantees.map((guarantee) => (
+                  <MenuItem value={guarantee.id}>{guarantee.name}</MenuItem>
+                ))}
+              </Select>
+              <Box sx={{ mt: 5, ml: 'auto' }}>
+                <Button
+                  size="medium"
+                  onClick={handleWarrantyProduct}
+                  variant="contained"
+                >
+                  {'Warranty Product'}
+                </Button>
+              </Box>
+            </FormControl>
+          </Box>
+        </Modal>
         <div className="orderWrapper">
           <div className="listOrder">
             <h4>Danh sánh đơn đặt hàng</h4>
@@ -160,9 +278,9 @@ const Order = () => {
                   </div>
                   <div className="rowOrder">
                     <p className="fieldOrder">
-                      Order date :{" "}
+                      Order date :{' '}
                       {moment(finalClickInfo.row.orderDate).format(
-                        "DD-MM-YYYY"
+                        'DD-MM-YYYY'
                       )}
                     </p>
                   </div>
@@ -184,40 +302,6 @@ const Order = () => {
                 </>
               )}
             </div>
-            {/* <button className="createOrder" onClick={toggleShowCreate}>
-              Create order
-            </button>
-            {showCreate && (
-              <div className="model">
-                <div onClick={toggleShowCreate} className="overlay"></div>
-                <form className="content" onSubmit={handleSubmit(onSubmit)}>
-                  <label className="row">
-                    Name
-                    <input {...register("name")} placeholder="enter name" />
-                  </label>
-                  <label className="row">
-                    Username
-                    <input
-                      {...register("username")}
-                      placeholder="enter username"
-                    />
-                  </label>
-                  <label className="row">
-                    Email
-                    <input {...register("email")} placeholder="enter email" />
-                  </label>
-                  <label className="row">
-                    Type Account
-                    <select {...register("gender")}>
-                      <option value="female">female</option>
-                      <option value="male">male</option>
-                      <option value="other">other</option>
-                    </select>
-                  </label>
-                  <input type="submit" />
-                </form>
-              </div>
-            )} */}
           </div>
         </div>
       </div>
