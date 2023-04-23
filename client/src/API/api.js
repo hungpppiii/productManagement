@@ -16,6 +16,13 @@ const getStoreAPI = async () => {
     return res.data;
 };
 
+const getGuaranteeAPI = async () => {
+    const res = await axios.get('http://localhost:8080/api/account/getAllGuarantee', {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
 const createProductAPI = async (data) => {
     try {
         const res = await axios.post(
@@ -42,7 +49,23 @@ const distributeProductAPI = async (id, data) => {
                 withCredentials: true,
             }
         );
-        console.log('create product line', res.data);
+        console.log('distribute product line', res.data);
+        return res.data.success;
+    } catch (error) {
+        console.log('error fetch', error);
+        return false;
+    }
+};
+
+const warrantyProductAPI = async (id, data) => {
+    try {
+        const res = await axios.patch(
+            `http://localhost:8080/api/product/warranty/${id}`,
+            data, {
+                withCredentials: true,
+            }
+        );
+        console.log('warranty product line', res.data);
         return res.data.success;
     } catch (error) {
         console.log('error fetch', error);
@@ -66,7 +89,9 @@ const deleteProductAPI = async (id) => {
 export {
     getAllProductLineAPI,
     getStoreAPI,
+    getGuaranteeAPI,
     createProductAPI,
     distributeProductAPI,
+    warrantyProductAPI,
     deleteProductAPI
 }
