@@ -7,13 +7,17 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../../context/AuthContext";
 import axios from "axios";
 import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Close";
 import moment from "moment";
 
 export default function ProductLine() {
   const { user } = useContext(AuthContext);
   const height = 631;
   const [rows, setRows] = useState([]);
+  const [rowModesModel, setRowModesModel] = useState({});
 
   useEffect(() => {
     const getAllProductLine = async () => {
@@ -37,29 +41,61 @@ export default function ProductLine() {
     getAllProductLine();
   }, []);
 
-  const columns_ = [
-    { headerName: "Id", field: "id", width: 250, editable: true },
-    { headerName: "Name", field: "name", width: 120, editable: true },
-    { headerName: "Size", field: "size", width: 200, editable: true },
-    { headerName: "Price", field: "price", width: 120, editable: true },
-    { headerName: "Seats", field: "seats", width: 120, editable: true },
-    { headerName: "Engine", field: "engine", width: 120, editable: true },
-    { headerName: "Xylanh", field: "xylanh", width: 120, editable: true },
-    { headerName: "Hp", field: "hp", width: 120, editable: true },
-  ];
+  const processRowUpdate = async (newRow) => {
+    const data = {
+      name: newRow.name,
+      price: newRow.price,
+      warranty_period: newRow.warrantyPeriod,
+      description: newRow.description,
+    };
+    console.log(data);
+    try {
+      const res = await axios.patch(
+        "http://localhost:8080/api/productLine/" + newRow.id,
+        data,
+        {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        }
+      );
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
 
-  const handleClick = (id) => () => {
-    console.log(id);
-    // setRows(rows.filter((row) => row.id !== id));
+    const updatedRow = { ...newRow, isNew: false };
+    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+    return updatedRow;
   };
-  const handleClickother = (id) => () => {
-    console.log(id);
-    // setRows(rows.filter((row) => row.id !== id));
+
+  const handleEditClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
-  const [rowModesModel, setRowModesModel] = useState({});
+
+  const handleSaveClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+  };
+
+  const handleDeleteClick = (id) => () => {
+    console.log(id);
+    setRows(rows.filter((row) => row.id !== id));
+  };
+
+  const handleCancelClick = (id) => () => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+
+    const editedRow = rows.find((row) => row.id === id);
+    if (editedRow.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
+    }
+  };
 
   const columns = [
-    { headerName: "Id", field: "id", width: 20, editable: true },
+    { headerName: "Id", field: "id", width: 20, editable: false },
     { headerName: "Name", field: "name", width: 275, editable: true },
     { headerName: "Price", field: "price", width: 120, editable: true },
     {
@@ -78,7 +114,7 @@ export default function ProductLine() {
       headerName: "createdAt",
       field: "createdAt",
       width: 120,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
         if (params.row.createdAt == null) {
           return "Null";
@@ -91,7 +127,7 @@ export default function ProductLine() {
       headerName: "updatedAt",
       field: "updatedAt",
       width: 120,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
         if (params.row.updatedAt == null) {
           return "Null";
@@ -100,31 +136,48 @@ export default function ProductLine() {
         }
       },
     },
-    // {
-    //   field: "actions",
-    //   type: "actions",
-    //   headerName: "Actions",
-    //   width: 100,
-    //   cellClassName: "actions",
-    //   getActions: ({ id }) => {
-    //     return [
-    //       <GridActionsCellItem
-    //         icon={<SaveIcon />}
-    //         label="Edit"
-    //         className="textPrimary"
-    //         onClick={handleClick(id)}
-    //         color="inherit"
-    //       />,
-    //       <GridActionsCellItem
-    //         icon={<SaveIcon />}
-    //         label="Edit"
-    //         className="textPrimary"
-    //         onClick={handleClickother(id)}
-    //         color="inherit"
-    //       />,
-    //     ];
-    //   },
-    // },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={handleCancelClick(id)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
 
   const data = [
@@ -170,7 +223,17 @@ export default function ProductLine() {
       <Sidebar />
       <div className="wrapper">
         <Navbar />
-        <Table {...{ columns, rows, setRows, height }} />
+        <Table
+          {...{
+            columns,
+            rows,
+            setRows,
+            height,
+            rowModesModel,
+            setRowModesModel,
+            processRowUpdate,
+          }}
+        />
       </div>
     </div>
   );

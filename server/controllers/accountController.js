@@ -27,7 +27,13 @@ const getAllAccount = async (req, res, next) => {
         //     success: true,
         //     data: [...accounts[0], ...accounts[1], ...accounts[2]],
         // });
-        const accounts = await Account.findAll();
+        const accounts = await Account.findAll({
+            where: {
+                role: {
+                    [Op.not]: AccountRole.ADMIN,
+                },
+            },
+        });
         res.status(200).json(accounts);
     } catch (error) {
         console.log(error);
@@ -202,7 +208,7 @@ const editAccount = async (req, res, next) => {
             {
                 username: req.body.username,
                 password: req.body.password,
-                role: req.body.role,
+                // role: req.body.role,
             },
             {
                 where: {
