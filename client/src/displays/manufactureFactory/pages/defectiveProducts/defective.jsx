@@ -1,135 +1,137 @@
-import "./defective.css";
-import Sidebar from "../sidebar/sidebar";
-import Navbar from "../../../../components/navbar/navbar";
-import Table from "../../../../components/table/table";
+import './defective.css';
+import Sidebar from '../sidebar/sidebar';
+import Navbar from '../../../../components/navbar/navbar';
+import Table from '../../../../components/table/table';
+import formatPrice from '../../../../utils/formatPrice';
 
+import DeleteIcon from '@mui/icons-material/Delete';
+import moment from 'moment';
 
-import Looks3Icon from '@mui/icons-material/Looks3';
-import Looks4Icon from '@mui/icons-material/Looks4';
-import Looks5Icon from '@mui/icons-material/Looks5';
-import Looks2Icon from '@mui/icons-material/LooksTwo';
-import Looks1Icon from '@mui/icons-material/LooksOne';
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Close";
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import { deleteProductAPI } from '../../../../API/api';
 
+import { GridActionsCellItem } from '@mui/x-data-grid';
 
-import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
+import axios from 'axios';
+import React, { useCallback, useEffect } from 'react';
+import { useState } from 'react';
 
-import axios from "axios";
-import React, { useEffect } from "react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-export default function Warehouse() {
-    const height = 631;
-    const [rowModesModel, setRowModesModel] = React.useState({});
-    const [rows, setRows] = useState([]);
-    useEffect(() => {
-      const getAllProduct = async () => {
-        try {
-          const res = await axios.post("http://localhost:8000/api/toyProduct/getDefectiveProduct",JSON.parse(localStorage.user));
-          setRows(res.data);
-        } catch (error) {
-          console.log(error);
+export default function Defectives() {
+  const height = 631;
+  const [rows, setRows] = useState([]);
+
+  const getAllProduct = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        'http://localhost:8080/api/product/getAllProducts/error',
+        {
+          withCredentials: true,
         }
-      };
-      getAllProduct();
-    }, []);
-
-    if(rows !== null){
-
-      for(var i = 0; i < rows.length; i++){
-        rows[i].name = rows[i].idProductLine.name
+      );
+      setRows(res.data.data);
+      if (res.data.success) {
       }
-      }
-      if(rows !== null){
+      console.log('get all product error', res.data);
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
+  });
 
-        for(var i = 0; i < rows.length; i++){
-          rows[i].id = rows[i]._id
-        }
-        }
+  useEffect(() => {
+    getAllProduct();
+  }, []);
 
-    const handleDeleteClick = (id) => () => {
-      console.log(id);
-      setRows(rows.filter((row) => row.id !== id));
-    };
-  
-    const handleCancelClick = (id) => () => {
-      setRowModesModel({
-        ...rowModesModel,
-        [id]: { mode: GridRowModes.View, ignoreModifications: true },
-      });
-  
-      const editedRow = rows.find((row) => row.id === id);
-      if (editedRow.isNew) {
-          setRows(rows.filter((row) => row.id !== id));
-        }
-    };
-    const handleDelClick = (id) => () => {
-      var index = 0;
-      for(let i = 0; i < rows.length; i++){
-          if(rows[i]._id == id){
-              index = i
-      }
-      console.log("http://localhost:8000/api/toyProduct/"+ rows[index]._id)
-      }
+  const handleDeleteProduct = async (id) => {
+    console.log('product id', id);
+    alert('bạn có chắc chắn muốn xóa không');
+    const success = await deleteProductAPI(id);
+    if (success) {
+      await getAllProduct();
+      console.log('success: ', success);
+    } else {
+      console.log('error: ', success);
+    }
+  };
 
-      var update = axios.delete("http://localhost:8000/api/toyProduct/"+ rows[index]._id);
-      setRows(rows.filter((row) => row.id !== id));
-  }
-    const columns = [
-      { title: "id", field: "id", width: 300, editable: false },
-      { title: "name", field: "name", width: 120, editable: false },
-      { title: "status", field: "status", width: 210, editable: false },
-      {
-        field: "actions",
-        type: "actions",
-        headerName: "Actions",
-        width: 300,
-        cellClassName: "actions",
-        getActions: ({ id }) => {
-          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-          return [
-            <GridActionsCellItem
-              icon={<AutoFixHighIcon />}
-              label="Add"
-              className="textPrimary"
-              onClick={handleDelClick(id)}
-              color="inherit"
-            />,
-            <GridActionsCellItem
-              icon={<DeleteForeverIcon />}
-              label="Add"
-              className="textPrimary"
-              onClick={handleDelClick(id)}
-              color="inherit"
-            />,
-          ];
-        },
+  const columns = [
+    {
+      headerName: 'Name',
+      field: 'ProductLine.name',
+      width: 220,
+      renderCell: (params) => {
+        return params.row.ProductLine.name;
       },
-    ];
-  
-  
-    return (
-      <div className="products">
-        <Sidebar />
-        <div className="wrapper">
-          <Navbar />
-          <Table
-            {...{
-              columns,
-              rows,
-              setRows,
-              height,
+    },
+    {
+      headerName: 'Price',
+      field: 'ProductLine.price',
+      width: 120,
+      renderCell: (params) => {
+        return formatPrice(params.row.ProductLine.price);
+      },
+    },
+    {
+      headerName: 'Warranty',
+      field: 'ProductLine.warrantyPeriod',
+      width: 120,
+      renderCell: (params) => {
+        return params.row.ProductLine.warrantyPeriod + ' month';
+      },
+    },
+    { headerName: 'Status', field: 'status', width: 120, editable: false },
+    {
+      headerName: 'Production Date',
+      field: 'productionDate',
+      width: 120,
+      type: 'date',
+      editable: false,
+      renderCell: (params) => {
+        if (params.row.productionDate == null) {
+          return 'Null';
+        } else {
+          return moment(params.row?.productionDate).format('DD-MM-YYYY');
+        }
+      },
+    },
+    {
+      headerName: 'Description',
+      field: 'description',
+      width: 300,
+      renderCell: (params) => {
+        return params.row.ProductLine.description;
+      },
+    },
+    {
+      headerName: 'Action',
+      type: 'actions',
+      width: 100,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        return [
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            className="textPrimary"
+            onClick={() => handleDeleteProduct(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
+  ];
 
-              rowModesModel,
-              setRowModesModel,
-            }}
-          />
-        </div>
+  return (
+    <div className="products">
+      <Sidebar />
+      <div className="wrapper">
+        <Navbar />
+        <Table
+          {...{
+            columns,
+            rows,
+            height,
+          }}
+        />
       </div>
-    );
-  }
-  
+    </div>
+  );
+}

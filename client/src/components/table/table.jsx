@@ -1,10 +1,10 @@
-import { Box } from "@mui/material";
+import { Box } from '@mui/material';
 
-import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
+import { DataGrid } from '@mui/x-data-grid';
+import axios from 'axios';
 
-import React from "react";
-import { useState } from "react";
+import React from 'react';
+import { useState } from 'react';
 
 const Table = ({
   columns,
@@ -15,6 +15,7 @@ const Table = ({
   setRowModesModel,
   handleOnCellClick,
   processRowUpdate,
+  apiRef,
 }) => {
   const [pageSize, setPageSize] = useState(10);
 
@@ -26,23 +27,6 @@ const Table = ({
     event.defaultMuiPrevented = true;
   };
 
-  // const processRowUpdate = async (newRow) => {
-  //   console.log(newRow);
-  //   // try {
-  //   //   const res = await axios.put(
-  //   //     "http://localhost:8000/api/toyProduct/",
-  //   //     newRow
-  //   //   );
-  //   //   console.log(res.data);
-  //   // } catch (error) {
-  //   //   console.log(error);
-  //   // }
-
-  //   const updatedRow = { ...newRow, isNew: false };
-  //   setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-  //   return updatedRow;
-  // };
-
   const handleRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
@@ -53,10 +37,10 @@ const Table = ({
         className="box"
         sx={{
           height: height,
-          width: "100%",
+          width: '100%',
         }}
         style={{
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
       >
         <DataGrid
@@ -76,6 +60,8 @@ const Table = ({
           processRowUpdate={processRowUpdate}
           experimentalFeatures={{ newEditingApi: true }}
           onCellClick={handleOnCellClick}
+          getRowHeight={() => 'auto'}
+          apiRef={apiRef}
           onCellEditCommit={(params) => setRows(params)}
         />
       </Box>
