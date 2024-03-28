@@ -1,5 +1,6 @@
 const { Account } = require('../models');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 // @desc      Login
 // @route     [POST] /api/auth/login
@@ -17,7 +18,6 @@ const login = async (req, res, next) => {
         const account = await Account.findOne({
             where: {
                 username,
-                password,
             },
         });
 
@@ -25,6 +25,12 @@ const login = async (req, res, next) => {
             return next({
                 message: 'Account does not exist',
             });
+        }
+
+        const checkPassword = await bcrypt.compare(password, account.password);
+
+        if (!checkPassword) {
+            throw new Error('Login information is incorrect.');
         }
 
         const token = jwt.sign(

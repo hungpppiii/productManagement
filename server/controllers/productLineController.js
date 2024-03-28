@@ -1,7 +1,7 @@
 const { ProductLine } = require('../models');
 
 // @desc      get all product line
-// @route     [POST] /api/productLine/getAllProductLine
+// @route     [POST] /api/product-line
 // @access    Private
 const getAllProductLine = async (req, res, next) => {
     try {
@@ -16,7 +16,7 @@ const getAllProductLine = async (req, res, next) => {
 };
 
 // @desc      get all product line
-// @route     [POST] /api/productLine/create
+// @route     [POST] /api/product-line
 // @access    Private/Admin
 const createProductLine = async (req, res, next) => {
     try {
@@ -42,7 +42,7 @@ const createProductLine = async (req, res, next) => {
 };
 
 // @desc      update product line
-// @route     [PATCH] /api/productLine/:id
+// @route     [PATCH] /api/product-line/:id
 // @access    Private/Admin
 const updateProductLine = async (req, res, next) => {
     try {
@@ -76,7 +76,7 @@ const updateProductLine = async (req, res, next) => {
 };
 
 // @desc      update product line
-// @route     [DELETE] /api/productLine/:id
+// @route     [DELETE] /api/product-line/:id
 // @access    Private/Admin
 const deleteProductLine = async (req, res, next) => {
     try {

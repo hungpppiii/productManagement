@@ -2,9 +2,10 @@ const sequelize = require('../config/db');
 const { Account, Factory, Store, Guarantee } = require('../models');
 const AccountRole = require('../utils/constants/AccountRole');
 const { Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 
 // @desc      get all account
-// @route     [GET] /api/account/getAllAccount
+// @route     [GET] /api/account
 // @access    Private/Admin
 const getAllAccount = async (req, res, next) => {
     try {
@@ -42,11 +43,27 @@ const getAllAccount = async (req, res, next) => {
 };
 
 // @desc      get all account factory
-// @route     [GET] /api/account/getAllFactory
+// @route     [GET] /api/account/{:facility}
 // @access    Private
-const getAllFactory = async (req, res, next) => {
+const getAllFacility = async (req, res, next) => {
     try {
-        const factories = await Factory.findAll({
+        const facilityName = req.params.facility;
+        let model;
+        switch (facilityName) {
+            case AccountRole.FACTORY:
+                model = Factory;
+                break;
+            case AccountRole.STORE:
+                model = Store;
+                break;
+            case AccountRole.GUARANTEE:
+                model = Guarantee;
+                break;
+            default:
+                throw new Error('account role not exists!');
+        }
+
+        const factories = await model.findAll({
             attributes: ['id', 'name', 'address', 'phone'],
             include: Account,
         });
@@ -58,46 +75,6 @@ const getAllFactory = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return next(error);
-    }
-};
-
-// @desc      get all account store
-// @route     [GET] /api/account/getAllStore
-// @access    Private
-const getAllStore = async (req, res, next) => {
-    try {
-        const stores = await Store.findAll({
-            attributes: ['id', 'name', 'address', 'phone'],
-            include: Account,
-        });
-
-        res.status(200).json({
-            success: true,
-            data: stores,
-        });
-    } catch (error) {
-        console.log(error);
-        return next(error);
-    }
-};
-
-// @desc      get all account guarantee
-// @route     [GET] /api/account/getAllGuarantee
-// @access    Private
-const getAllGuarantee = async (req, res, next) => {
-    try {
-        const guarantees = await Guarantee.findAll({
-            attributes: ['id', 'name', 'address', 'phone'],
-            include: Account,
-        });
-
-        res.status(200).json({
-            success: true,
-            data: guarantees,
-        });
-    } catch (error) {
-        console.log(error);
-        next(error);
     }
 };
 
@@ -117,7 +94,7 @@ const getAccount = async (req, res, next) => {
 };
 
 // @desc      create account
-// @route     [POST] /api/account/create
+// @route     [POST] /api/account
 // @access    Private/Admin
 const createAccount = async (req, res, next) => {
     const transaction = await sequelize.transaction();
@@ -125,8 +102,7 @@ const createAccount = async (req, res, next) => {
         const { username, password, role, ...facilityConfig } = req.body;
         const data = {
             username,
-            //   password: await bcrypt.hash(password, 10),
-            password,
+            password: await bcrypt.hash(password, 10),
             role,
         };
 
@@ -138,46 +114,31 @@ const createAccount = async (req, res, next) => {
             throw new Error('Details are not correct');
         }
 
-        let facility;
+        let model;
         switch (role) {
             case AccountRole.FACTORY:
-                facility = await Factory.create(
-                    {
-                        ...facilityConfig,
-                        accountId: user.id,
-                    },
-                    {
-                        transaction,
-                    },
-                );
+                model = Factory;
                 break;
             case AccountRole.STORE:
-                facility = await Store.create(
-                    {
-                        ...facilityConfig,
-                        accountId: user.id,
-                    },
-                    {
-                        transaction,
-                    },
-                );
-
+                model = Store;
                 break;
             case AccountRole.GUARANTEE:
-                facility = await Guarantee.create(
-                    {
-                        ...facilityConfig,
-                        accountId: user.id,
-                    },
-                    {
-                        transaction,
-                    },
-                );
+                model = Guarantee;
                 break;
 
             default:
                 throw new Error('account role not exists!');
         }
+
+        const facility = await model.create(
+            {
+                ...facilityConfig,
+                accountId: user.id,
+            },
+            {
+                transaction,
+            },
+        );
 
         if (!facility) {
             throw new Error('create facility failed');
@@ -253,9 +214,7 @@ const deleteAccount = async (req, res, next) => {
 
 module.exports = {
     getAllAccount,
-    getAllFactory,
-    getAllStore,
-    getAllGuarantee,
+    getAllFacility,
     getAccount,
     createAccount,
     editAccount,
