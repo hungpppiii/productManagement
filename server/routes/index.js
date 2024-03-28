@@ -8,7 +8,7 @@ const route = (app) => {
     app.use('/api/auth', authRouter);
     app.use('/api/account', verifyAccount, accountRouter);
     app.use('/api/product', verifyAccount, productRouter);
-    app.use('/api/productLine', verifyAccount, productLineRouter);
+    app.use('/api/product-line', verifyAccount, productLineRouter);
 };
 
 module.exports = route;

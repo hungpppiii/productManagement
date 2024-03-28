@@ -11,15 +11,16 @@ const sequelize = require('../config/db');
 const ProductStatus = require('../utils/constants/ProductStatus');
 
 // @desc      get product list inventory
-// @route     [GET] /api/product/getAllProducts/inventory
+// @route     [GET] /api/factory/product?status
 // @access    Private/Factory
-const getAllProductInventory = async (req, res, next) => {
+const getAllFactoryProduct = async (req, res, next) => {
     try {
         const factory = res.locals.factory;
+        const productStatus = req.query.status;
 
         const products = await factory.getProducts({
             where: {
-                status: ProductStatus.INVENTORY,
+                status: productStatus,
             },
             attributes: ['id', 'productionDate', 'status'],
             include: {
@@ -42,50 +43,12 @@ const getAllProductInventory = async (req, res, next) => {
             data: products,
         });
     } catch (error) {
-        console.log(error);
-        return next(error);
-    }
-};
-
-// @desc      get product list error
-// @route     [GET] /api/product/getAllProducts/error
-// @access    Private/Factory
-const getAllProductError = async (req, res, next) => {
-    try {
-        const factory = res.locals.factory;
-
-        const products = await factory.getProducts({
-            where: {
-                status: ProductStatus.ERROR,
-            },
-            attributes: ['id', 'productionDate', 'status'],
-            include: {
-                model: ProductLine,
-                required: true,
-                attributes: ['name', 'warrantyPeriod', 'price', 'description'],
-            },
-            required: true,
-        });
-
-        if (!products) {
-            return next({
-                message: `No products found for factory - '${factory.id}'`,
-                statusCode: 404,
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            data: products,
-        });
-    } catch (error) {
-        console.log(error);
         return next(error);
     }
 };
 
 // @desc      get product list distributed
-// @route     [GET] /api/product/getAllProducts/distributed
+// @route     [GET] /api/product/distributed
 // @access    Private/Store
 const getAllProductDistributed = async (req, res, next) => {
     try {
@@ -125,13 +88,12 @@ const getAllProductDistributed = async (req, res, next) => {
             data: distributeInformations,
         });
     } catch (error) {
-        console.log(error);
         return next(error);
     }
 };
 
 // @desc      get product list sold
-// @route     [GET] /api/product/getAllProducts/sold
+// @route     [GET] /api/product/sold
 // @access    Private/Store
 const getAllProductSold = async (req, res, next) => {
     try {
@@ -178,13 +140,12 @@ const getAllProductSold = async (req, res, next) => {
             data: orders,
         });
     } catch (error) {
-        console.log(error);
         return next(error);
     }
 };
 
 // @desc      get product list order
-// @route     [GET] /api/product/getAllProducts/Order
+// @route     [GET] /api/product/Order
 // @access    Private/Store
 const getAllProductOrder = async (req, res, next) => {
     try {
@@ -204,7 +165,7 @@ const getAllProductOrder = async (req, res, next) => {
 };
 
 // @desc      get product list warranty
-// @route     [GET] /api/product/getAllProducts/warranty
+// @route     [GET] /api/product/warranty
 // @access    Private/Guarantee
 const getAllProductWarranty = async (req, res, next) => {
     try {
@@ -300,7 +261,7 @@ const getProduct = async (req, res, next) => {
 };
 
 // @desc      create new product
-// @route     [POST] /api/product/create
+// @route     [POST] /apƯi/product
 // @access    Private/Factory
 const createProduct = async (req, res, next) => {
     const t = await sequelize.transaction();
@@ -396,7 +357,7 @@ const deleteProduct = async (req, res, next) => {
 };
 
 // @desc      product distribution
-// @route     [PATCH] /api/product/distributed/:id
+// @route     [PATCH] /api/product/:id/distributed
 // @access    Private/Factory
 const productDistribution = async (req, res, next) => {
     const transaction = await sequelize.transaction();
@@ -447,7 +408,7 @@ const productDistribution = async (req, res, next) => {
 };
 
 // @desc      sold product
-// @route     [PATCH] /api/product/sold/:id
+// @route     [PATCH] /api/product/:id/sold
 // @access    Private/Store
 const soldProduct = async (req, res, next) => {
     const transaction = await sequelize.transaction();
@@ -508,7 +469,7 @@ const soldProduct = async (req, res, next) => {
 };
 
 // @desc      create new product
-// @route     [PATCH] /api/product/warranty/:id
+// @route     [PATCH] /api/product/:id/warranty
 // @access    Private/Factory
 const productWarranty = async (req, res, next) => {
     const transaction = await sequelize.transaction();
@@ -567,7 +528,7 @@ const productWarranty = async (req, res, next) => {
 };
 
 // @desc      return product
-// @route     [PATCH] /api/product/return/:id
+// @route     [PATCH] /api/product/:id/return
 // @access    Private/Guarantee
 const returnProductAfterWarranty = async (req, res, next) => {
     const transaction = await sequelize.transaction();
@@ -674,8 +635,7 @@ const updateProductStatus =
     };
 
 module.exports = {
-    getAllProductInventory,
-    getAllProductError,
+    getAllFactoryProduct,
     getAllProductDistributed,
     getAllProductSold,
     getAllProductWarranty,
